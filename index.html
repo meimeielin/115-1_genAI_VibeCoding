@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>像素冒險手帳 Pixel Quest Desk</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9' shape-rendering='crispEdges'%3E%3Crect x='1' y='2' width='12' height='7' fill='%23203650'/%3E%3Crect x='2' y='2' width='10' height='6' fill='%239ad3f7'/%3E%3Crect x='4' y='4' width='1' height='2' fill='%23203650'/%3E%3Crect x='9' y='4' width='1' height='2' fill='%23203650'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef8ff; --paper:#ffffff; --soft:#e3f2fd; --soft2:#f5fbff;
+  --blue:#a9dbf8; --blue2:#5fb2ea; --blue3:#2f78b7;
+  --ink:#24405e; --muted:#7a8da3; --line:#24405e;
+  --edge:#c4e2f7; --edge2:#93c5ea; --drop:#d6ecfb; --drop2:#b5daf4;
+  --yellow:#ffd866; --pink:#ff9fb2; --green:#86d595; --red:#ee6b6b; --orange:#ffb36b;
+  --pixel:'DotGothic16','PingFang TC','Microsoft JhengHei',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--sans); color:var(--ink); font-size:15px; line-height:1.5;
+  background-color:var(--bg);
+  background-image:linear-gradient(rgba(95,178,234,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(95,178,234,.07) 1px,transparent 1px);
+  background-size:16px 16px;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{font-family:var(--pixel);font-weight:400;margin:0}
+.px{font-family:var(--pixel)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.hidden{display:none!important}
+.grow{flex:1;min-width:0}
+
+/* pixel icons */
+.pi{width:1.15em;height:1.15em;vertical-align:-.2em;flex:0 0 auto;shape-rendering:crispEdges}
+.tile{display:inline-grid;place-items:center;width:28px;height:28px;flex:0 0 28px;color:var(--ink);margin:2px;
+  box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
+.tile .pi{width:18px;height:18px}
+
+/* pixel-notched outline: draws a border with the 4 corner pixels missing */
+.pxo{box-shadow:0 -3px 0 0 var(--o,var(--edge)),0 3px 0 0 var(--o,var(--edge)),-3px 0 0 0 var(--o,var(--edge)),3px 0 0 0 var(--o,var(--edge))}
+
+/* ---------- layout ---------- */
+.app{display:grid;grid-template-columns:214px 1fr;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;background:#d4edfc;border-right:3px solid var(--line);display:flex;flex-direction:column;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;padding:16px 14px}
+.brand b{font-family:var(--pixel);font-size:15px;line-height:1.2;font-weight:400}
+.brand small{display:block;font-family:var(--pixel);font-size:10px;color:var(--muted);letter-spacing:.5px}
+.nav{padding:4px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;flex:1}
+.nav a{display:flex;align-items:center;gap:10px;padding:6px 8px;text-decoration:none;color:var(--ink);font-family:var(--pixel);font-size:15px}
+.nav a .tile{width:24px;height:24px;flex-basis:24px}
+.nav a:hover{background:rgba(255,255,255,.55)}
+.nav a.on{background:var(--paper);--o:var(--line);box-shadow:0 -2px 0 0 var(--o),0 2px 0 0 var(--o),-2px 0 0 0 var(--o),2px 0 0 0 var(--o)}
+.side-foot{padding:12px 16px;font-size:12px;font-family:var(--pixel);color:var(--muted)}
+
+.main{min-width:0}
+.top{display:flex;align-items:center;gap:14px;padding:10px 24px;border-bottom:3px solid var(--line);background:rgba(255,255,255,.92);position:sticky;top:0;z-index:20;backdrop-filter:blur(4px)}
+.top .date{font-family:var(--pixel);font-size:16px}
+.top .wk{font-family:var(--pixel);font-size:13px;background:var(--soft);padding:1px 8px}
+.top .sp{flex:1}
+.lv{display:flex;align-items:center;gap:8px;font-family:var(--pixel)}
+.lv .badge{background:var(--yellow);padding:0 8px;font-size:14px;border:2px solid var(--line)}
+.bar{height:10px;background:var(--soft);position:relative;min-width:60px}
+.bar>i{position:absolute;inset:0 auto 0 0;background:var(--blue2);display:block}
+.bar.y>i{background:var(--yellow)}
+.bar.g>i{background:var(--green)}
+.bar.r>i{background:var(--red)}
+.bar.thin{height:6px;margin-bottom:8px}
+.lv .bar{width:120px;height:12px;border:2px solid var(--line)}
+.lv .exp{font-size:12px;color:var(--muted)}
+.burger{display:none}
+.page{padding:22px 26px 80px;max-width:1300px}
+.page-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-h h2{font-size:24px}
+.page-h h2::before{content:"";display:inline-block;width:10px;height:10px;background:var(--blue2);margin-right:10px;vertical-align:middle;box-shadow:3px 3px 0 var(--yellow)}
+.page-h .sp{flex:1}
+
+/* ---------- pieces ---------- */
+.card{background:var(--paper);padding:14px 16px;min-width:0;margin:3px;--o:var(--line);
+  box-shadow:0 -3px 0 0 var(--o),0 3px 0 0 var(--o),-3px 0 0 0 var(--o),3px 0 0 0 var(--o),6px 6px 0 0 var(--drop2)}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.card-h h3{font-size:16px;flex:1}
+.card-h .more{color:var(--muted);display:grid}
+[data-go]{cursor:pointer}
+.card-h[data-go]:hover h3,.sub-h[data-go]:hover{color:var(--blue3)}
+
+.btn{font-family:var(--pixel);font-size:14px;border:2px solid var(--line);background:var(--blue);padding:5px 12px;box-shadow:2px 2px 0 var(--line);cursor:pointer;white-space:nowrap;line-height:1.3;display:inline-flex;align-items:center;gap:5px}
+.btn:hover{filter:brightness(1.04)}
+.btn:active{transform:translate(2px,2px);box-shadow:none}
+.btn.w{background:var(--paper);border-color:var(--edge2);box-shadow:2px 2px 0 var(--edge2)}
+.btn.y{background:var(--yellow)}
+.btn.pk{background:#ffd3dc;border-color:#d97b8f;box-shadow:2px 2px 0 #d97b8f}
+.btn.sm{font-size:12px;padding:2px 8px}
+.btn.on{background:var(--green)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.iconbtn{border:0;background:none;cursor:pointer;padding:3px 5px;color:#a5b6c7;display:inline-grid;place-items:center}
+.iconbtn:hover{color:var(--ink);background:var(--soft)}
+.iconbtn.on{color:var(--blue3)}
+.seg{display:inline-flex;background:var(--soft);padding:3px;gap:3px}
+.seg button{border:0;background:transparent;font-family:var(--pixel);padding:3px 12px;cursor:pointer;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--paper);color:var(--ink);box-shadow:2px 2px 0 var(--edge2)}
+
+input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{border:2px solid var(--edge);background:var(--paper);padding:6px 8px;border-radius:0;outline:none;min-width:0}
+input:focus,select:focus,textarea:focus{border-color:var(--blue2);box-shadow:2px 2px 0 var(--edge)}
+select{appearance:none;-webkit-appearance:none;padding-right:30px;cursor:pointer;font-family:var(--pixel);font-size:14px;
+  background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2324405e'%3E%3Cpath d='M13 16h-2v-2h2v2Zm-2-2H9v-2h2v2Zm4 0h-2v-2h2v2Zm-6-2H7v-2h2v2Zm8 0h-2v-2h2v2ZM7 10H5V8h2v2Zm12 0h-2V8h2v2Z'/%3E%3C/svg%3E") no-repeat right 6px center/18px}
+textarea{resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>.grow{flex:1 1 160px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field>span{font-family:var(--pixel);font-size:13px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:12px;padding:0 6px;background:var(--soft);font-family:var(--pixel);line-height:1.6;white-space:nowrap;color:var(--ink)}
+.chip .pi{width:12px;height:12px}
+.chip.hot{background:#ffd3d3;color:#b23a3a}
+.chip.warm{background:#ffe6c7;color:#a2581c}
+.chip.ok{background:#dff3e2;color:#2c7a40}
+.chip.y{background:#fff1c2}
+.empty{color:var(--muted);font-size:13px;padding:10px 0;text-align:center}
+.hr{border-top:2px dashed var(--edge);margin:12px 0}
+.dot{display:inline-block;width:10px;height:10px;flex:0 0 10px}
+.sub-h{font-family:var(--pixel);font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px;color:var(--ink)}
+.sub-h .pi{color:var(--blue3)}
+.hint{font-size:12.5px;background:#fff8dc;padding:3px 8px;margin:-2px 0 8px;display:flex;gap:4px;align-items:center}
+.meta-line{display:flex;gap:4px 14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:-6px 0 14px}
+.meta-line .pi{margin-right:3px;color:var(--blue3)}
+
+/* checkbox */
+.chk{width:22px;height:22px;flex:0 0 22px;border:2px solid var(--line);background:var(--paper);cursor:pointer;padding:0;display:grid;place-items:center;color:transparent}
+.chk .pi{width:16px;height:16px}
+.chk:hover{background:var(--soft);color:var(--edge2)}
+.done .chk,.chk.on{background:var(--green);border-color:var(--line);color:var(--line)}
+
+/* task item: soft row, no heavy outline */
+.task{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 10px;background:var(--soft2);position:relative;margin-bottom:6px;border-left:3px solid var(--edge)}
+.task:hover{background:#eaf5fe}
+.task[draggable=true]{cursor:grab}
+.task.dragging{opacity:.4}
+.task .tt{flex:1;min-width:0}
+.task .name{word-break:break-word}
+.task .meta{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.task.done{opacity:.6;border-left-color:var(--green)}
+.task.done .name{text-decoration:line-through;color:var(--muted)}
+.stamp{font-family:var(--pixel);font-size:12px;color:var(--blue3);border:2px solid var(--blue3);padding:0 5px;transform:rotate(-8deg);white-space:nowrap;opacity:.9}
+.task .dot{border:0}
+
+/* ---------- dashboard ---------- */
+.hello{display:flex;gap:16px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.hello h2{font-size:22px}
+.hello p{margin:2px 0 0}
+.dash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.span2{grid-column:span 2}
+.span3{grid-column:1/-1}
+.quest{--o:var(--line)}
+.qsec{font-family:var(--pixel);font-size:13px;margin:6px 0 8px;display:flex;align-items:center;gap:6px}
+.qsec .pi{color:#d49a00}
+.qsec .muted{font-size:12px}
+.qsec::after{content:"";flex:1;border-top:2px dashed var(--edge)}
+.qitem{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:6px;background:var(--soft2);position:relative}
+.qitem.main{background:#fff6d6;padding:12px;margin:2px 2px 12px;box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line),4px 4px 0 0 #f0c44c}
+.qitem.main .nm{font-weight:600}
+.qitem .ico{color:var(--blue2);display:grid}
+.qitem.main .ico{color:#d49a00}
+.qitem .tt{flex:1;min-width:0}
+.qitem .xp{font-family:var(--pixel);font-size:12px;background:#fff1c2;padding:0 6px;color:#9a6b00}
+.qitem.done{opacity:.6}
+.qitem.done .nm{text-decoration:line-through}
+.qitem.done .xp{background:#dff3e2;color:#2c7a40}
+.qprog{display:flex;align-items:center;gap:10px;margin-top:10px;font-family:var(--pixel);font-size:13px}
+.qprog .bar{flex:1}
+.allclear{text-align:center;font-family:var(--pixel);padding:6px;background:#fff1c2;margin-top:10px}
+.sched{list-style:none;margin:0;padding:0}
+.sched li{display:flex;gap:10px;padding:7px 0;border-bottom:2px dotted var(--soft);align-items:center}
+.sched .t{font-family:var(--pixel);font-size:12.5px;width:90px;flex:0 0 90px;color:var(--muted)}
+.sched .kind{color:#a5b6c7;display:grid}
+.kv{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0}
+.kv b{font-family:var(--pixel);font-weight:400}
+.kv .dot{vertical-align:middle;margin-right:2px}
+.stat3,.stat4{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stat4{grid-template-columns:repeat(4,1fr);margin-bottom:14px}
+.stat3>div,.stat4>div{padding:6px 4px;background:var(--soft2)}
+.stat4>.warn{background:#fff1c2}
+.stat3 small,.stat4 small{display:block;font-size:12px;color:var(--muted)}
+.stat3 b,.stat4 b{font-family:var(--pixel);font-weight:400;font-size:17px}
+.hab-mini{display:flex;align-items:center;gap:8px;padding:5px 0}
+.hab-mini .nm{flex:1}
+.hab-mini .hico{color:var(--blue3);display:grid}
+.hab-mini.done .nm{color:var(--muted);text-decoration:line-through}
+.streak{font-family:var(--pixel);font-size:12px;color:#d9733a;display:inline-flex;align-items:center;gap:1px;min-width:34px}
+.review-thumb{width:100%;aspect-ratio:16/10;background:var(--soft2) center/cover no-repeat;display:grid;place-items:center;font-family:var(--pixel);color:var(--muted);cursor:pointer;text-align:center;border:2px dashed var(--edge2)}
+.review-thumb[style*=url]{border:0}
+.notice{background:#fffbea;padding:10px 14px;margin:3px 3px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:0 -3px 0 0 #f0c44c,0 3px 0 0 #f0c44c,-3px 0 0 0 #f0c44c,3px 0 0 0 #f0c44c}
+.notice p{margin:0;flex:1 1 240px}
+.pinlist{list-style:none;padding:0;margin:10px 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.pinlist li{padding:8px 10px;font-size:14px;white-space:pre-wrap;word-break:break-word;max-height:5.6em;overflow:hidden}
+.pinlist .pin{color:#d9733a;margin-right:3px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.two.tight{gap:18px}
+
+/* ---------- tasks ---------- */
+.addbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.addbar input[type=text]{flex:1 1 220px}
+.quadwrap{display:grid;grid-template-columns:28px 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:16px}
+.axis{font-family:var(--pixel);font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--muted);gap:4px}
+.axis.v{writing-mode:vertical-rl;letter-spacing:4px}
+.zone{background:var(--paper);padding:12px;min-height:150px;margin:3px;
+  box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line),6px 6px 0 0 var(--drop2)}
+.zone.over{background:#fffbea}
+.zone h4{font-size:14px;margin:-12px -12px 10px;padding:8px 12px;display:flex;gap:8px;align-items:center;background:color-mix(in srgb,var(--zc,#e3f2fd) 60%,white)}
+.zone h4 .tile{width:24px;height:24px;flex-basis:24px}
+.zone .cnt,.cchip .cnt{font-family:var(--pixel);font-size:12px;color:var(--muted);background:var(--soft2);padding:0 6px}
+.zone .task{background:var(--soft2);border-left-color:var(--zc,var(--edge))}
+.cols4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.zone.none{margin-top:22px;min-height:90px;background:#fafcfe;box-shadow:0 -3px 0 0 var(--edge2),0 3px 0 0 var(--edge2),-3px 0 0 0 var(--edge2),3px 0 0 0 var(--edge2)}
+.zone.none .tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 10px}
+.toolbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.tgl{display:flex;gap:6px;align-items:center;font-family:var(--pixel);font-size:13px;cursor:pointer}
+.tgl input{display:none}
+.tgl span{width:30px;height:16px;background:var(--edge);position:relative}
+.tgl span::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff}
+.tgl input:checked+span{background:var(--blue2)}
+.tgl input:checked+span::after{left:16px}
+
+/* ---------- timetable & detail ---------- */
+.tt-grid{display:grid;background:var(--paper);position:relative;overflow-x:auto;margin:3px;
+  box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line),6px 6px 0 0 var(--drop2)}
+.tt-head{font-family:var(--pixel);text-align:center;padding:6px;background:var(--soft);font-size:14px;color:var(--ink);border-bottom:3px solid var(--line)}
+.tt-head.today{background:#fff1c2;color:var(--ink)}
+.tt-col{position:relative;border-left:2px solid var(--soft2)}
+.tt-col.today{background:#fffdf3}
+.tt-time{font-family:var(--pixel);font-size:11px;color:#a5b6c7;position:relative}
+.tt-time span{position:absolute;right:4px;transform:translateY(-50%)}
+.tt-line{position:absolute;left:0;right:0;border-top:1px dashed #e7f2fb}
+.tt-blk{position:absolute;left:3px;right:3px;padding:3px 6px;font-size:12px;overflow:hidden;cursor:pointer;line-height:1.3;background:color-mix(in srgb,var(--c) 45%,white);border-left:4px solid var(--c)}
+.tt-blk:hover{background:color-mix(in srgb,var(--c) 65%,white)}
+.tt-blk b{display:block;font-family:var(--pixel);font-weight:400;font-size:13px}
+.course-list{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
+.cchip{border:0;padding:6px 12px;cursor:pointer;font-family:var(--pixel);background:var(--paper);display:flex;gap:8px;align-items:center;margin:2px;
+  box-shadow:0 -2px 0 0 var(--edge),0 2px 0 0 var(--edge),-2px 0 0 0 var(--edge),2px 0 0 0 var(--edge)}
+.cchip i{width:12px;height:12px;display:inline-block}
+.cchip.on{background:#fff6d6;box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line),4px 4px 0 0 var(--drop2)}
+.card.detail{padding-top:0}
+.card.detail::before{content:"";display:block;height:10px;background:var(--c);margin:0 -16px 14px;border-bottom:3px solid var(--line)}
+.weeks{max-height:520px;overflow-y:auto;padding-right:4px}
+.wk-row{display:flex;gap:8px;align-items:center;padding:5px 6px;border-bottom:2px dotted var(--soft)}
+.wk-row.now{background:#fff6d6}
+.wk-row .wl{font-family:var(--pixel);font-size:12px;width:72px;flex:0 0 72px;line-height:1.2}
+.wk-row input[type=text]{flex:1;padding:4px 6px;border-color:transparent;background:transparent}
+.wk-row input[type=text]:hover,.wk-row input[type=text]:focus{border-color:var(--edge);background:#fff}
+.wk-row.done input[type=text]{text-decoration:line-through;color:var(--muted)}
+.slot-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.sw{width:24px;height:24px;border:0;cursor:pointer;padding:0}
+.sw.on{outline:3px solid var(--ink);outline-offset:2px}
+.logrow{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:2px dotted var(--soft);font-size:14px}
+.logrow .ld{font-family:var(--pixel);font-size:12px;color:var(--muted);width:72px;flex:0 0 72px}
+.jlog{padding:8px 10px;background:var(--soft2);margin-bottom:8px;font-size:14px;border-left:3px solid #f0c44c}
+.jlog.paid{border-left-color:var(--green)}
+.jl-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:2px}
+.pay{border:0;font-family:var(--pixel);font-size:12px;padding:1px 8px;cursor:pointer;background:#fff1c2;color:#9a6b00;display:inline-flex;gap:3px;align-items:center}
+.pay.on{background:#dff3e2;color:#2c7a40}
+.nextbox{display:flex;gap:10px;align-items:flex-start;background:#fffbea;padding:10px 12px;margin-bottom:16px}
+
+/* ---------- calendar ---------- */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--paper);margin:3px;
+  box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line),6px 6px 0 0 var(--drop2)}
+.cal .wd{font-family:var(--pixel);text-align:center;padding:6px;background:var(--soft);font-size:13px;color:var(--ink);border-bottom:3px solid var(--line)}
+.cal .cell{min-height:104px;border-right:2px solid var(--soft2);border-bottom:2px solid var(--soft2);padding:4px;position:relative;cursor:pointer;background-size:cover;background-position:center;overflow:hidden}
+.cal .cell:nth-child(7n){border-right:0}
+.cal .cell.out{background-color:#fafdff;color:#c3d1de}
+.cal .cell:hover{box-shadow:inset 0 0 0 3px var(--edge2);z-index:1}
+.cal .cell .n{font-family:var(--pixel);font-size:14px;display:inline-block;min-width:24px;text-align:center;position:relative}
+.cal .cell.today .n{background:var(--yellow)}
+.cal .cell.photo .n{background:rgba(255,255,255,.9)}
+.cal .cell.photo.today .n{background:var(--yellow)}
+.cal .cell.photo::before{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(255,255,255,.75));pointer-events:none}
+.cal .ev{position:relative;font-size:11.5px;line-height:1.4;padding:0 4px;margin-top:2px;background:color-mix(in srgb,var(--c,#9ad3f7) 30%,white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal .ev.ddl{background:#ffe3e3;color:#a33}
+.cal .ev.more{background:transparent;color:var(--muted)}
+.week7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.week7 .day{background:var(--paper);min-height:300px;cursor:pointer;margin:3px;box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line)}
+.week7 .day:hover{background:#fafdff}
+.week7 .dh{font-family:var(--pixel);text-align:center;padding:5px;background:var(--soft);font-size:14px;border-bottom:3px solid var(--line)}
+.week7 .day.today .dh{background:#fff1c2}
+.week7 .dp{height:70px;background:center/cover}
+.week7 .it{font-size:12px;margin:6px;padding:3px 6px;line-height:1.35;word-break:break-word;background:color-mix(in srgb,var(--c,#9ad3f7) 35%,white);border-left:3px solid var(--c,#9ad3f7)}
+.week7 .it.ev2{background:#fff;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--c) 50%,white)}
+.week7 .it.ddl{background:#ffe9e9;border-left-color:var(--red)}
+.week7 .it small{display:block;color:var(--muted);font-family:var(--pixel);font-size:11px}
+.navrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.navrow .ttl{font-family:var(--pixel);font-size:18px;min-width:120px;text-align:center}
+
+/* ---------- habits ---------- */
+.habits{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px}
+.hcard .hh{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.hcard .hi{width:44px;height:44px;display:grid;place-items:center;background:#e2f6e5;flex:0 0 44px;color:var(--line);margin:2px;box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
+.hcard .hi .pi{width:28px;height:28px}
+.hcard .hn{flex:1;min-width:0}
+.hcard .hn b{font-family:var(--pixel);font-weight:400;font-size:17px;display:block;word-break:break-word}
+.hstats{display:flex;gap:8px;margin:10px 0}
+.hstats>div{flex:1;text-align:center;padding:3px;background:var(--soft2)}
+.hstats b{font-family:var(--pixel);font-weight:400;font-size:17px;display:flex;justify-content:center;align-items:center;gap:2px;line-height:1.3}
+.hstats b .pi{color:#d9733a}
+.hstats small{font-size:11px;color:var(--muted)}
+.hgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.hgrid.w12,.hgrid.m12{grid-template-columns:repeat(6,1fr)}
+.hgrid .wdh{font-family:var(--pixel);font-size:11px;text-align:center;color:var(--muted)}
+.hc{aspect-ratio:1;border:0;background:var(--soft2);cursor:pointer;font-family:var(--pixel);font-size:11px;display:grid;place-items:center;padding:0;line-height:1.1;color:var(--muted)}
+.hgrid.w12 .hc,.hgrid.m12 .hc{aspect-ratio:auto;padding:6px 0}
+.hc:hover{background:var(--soft)}
+.hc.on{background:var(--green);color:#1f5e30}
+.hc.today{box-shadow:inset 0 0 0 2px #f0c44c;color:var(--ink)}
+.hc.off{background:repeating-linear-gradient(45deg,#f6f8fa 0 3px,#edf1f5 3px 6px);color:#c3cdd7;cursor:default}
+.hc.off.on{background:var(--green)}
+.hc.fut{opacity:.4;cursor:default}
+.hc.blank{background:none;cursor:default}
+.hcard.arch{background:#fbfcfd}
+.hcard.arch .hi{background:#fff1c2;color:#9a6b00}
+.icons{display:flex;flex-wrap:wrap;gap:6px}
+.icons button{width:40px;height:40px;border:0;background:var(--soft2);cursor:pointer;display:grid;place-items:center;color:var(--ink)}
+.icons button .pi{width:24px;height:24px}
+.icons button.on{background:#fff1c2;box-shadow:inset 0 0 0 2px #f0c44c}
+.days7{display:flex;gap:4px;flex-wrap:wrap}
+.days7 label{padding:2px 10px;cursor:pointer;font-family:var(--pixel);background:var(--soft2)}
+.days7 input{display:none}
+.days7 label:has(input:checked){background:var(--blue)}
+
+/* ---------- money ---------- */
+.catpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.catpick button{border:0;background:transparent;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;cursor:pointer;font-family:var(--pixel);font-size:13px;color:var(--muted)}
+.catpick button .tile{width:26px;height:26px;flex-basis:26px;box-shadow:none}
+.catpick button.on{background:var(--soft);color:var(--ink);box-shadow:inset 0 -3px 0 var(--blue2)}
+.catbars .cb{display:grid;grid-template-columns:84px 1fr 80px;gap:8px;align-items:center;margin:7px 0;font-size:13px}
+.catbars .cb .bar{height:12px}
+.catbars .cb span:last-child{text-align:right;font-family:var(--pixel)}
+.mday{margin-top:12px}
+.mday h4{font-size:13px;display:flex;justify-content:space-between;border-bottom:2px solid var(--edge);padding-bottom:3px;margin-bottom:4px;color:var(--muted)}
+.mrow{display:flex;gap:10px;align-items:center;padding:5px 2px;border-bottom:1px dashed var(--soft)}
+.mrow .tile{width:26px;height:26px;flex-basis:26px;box-shadow:none}
+.mrow .d{flex:1;min-width:0}
+.mrow .a{font-family:var(--pixel)}
+.mrow .a.out{color:#c2415a}
+.mrow .a.in{color:#2c8a45}
+
+/* ---------- notes ---------- */
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.note{display:flex;flex-direction:column;min-height:180px;position:relative;margin:3px;box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line),6px 6px 0 0 var(--drop2)}
+.note textarea{flex:1;border:0;background:transparent;padding:12px 14px;font-size:14px;min-height:130px;resize:none;box-shadow:none!important}
+.note .nf{display:flex;align-items:center;gap:4px;padding:4px 6px;border-top:2px dashed rgba(36,64,94,.12)}
+.note .nf .sp{flex:1}
+.note .cdot{width:14px;height:14px;border:2px solid rgba(36,64,94,.25);cursor:pointer;padding:0}
+.note .pinmark{position:absolute;top:-8px;right:12px;color:#d9733a}
+.note .pinmark .pi{width:22px;height:22px}
+.note .ts{font-size:11px;color:var(--muted);font-family:var(--pixel)}
+
+/* ---------- review ---------- */
+.rcal .cell{min-height:120px}
+.rcal .note-snip{position:absolute;left:4px;right:4px;bottom:4px;font-size:11.5px;background:rgba(255,255,255,.92);padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rv-photo{width:100%;aspect-ratio:4/3;background:var(--soft2) center/contain no-repeat;display:flex;gap:6px;align-items:center;justify-content:center;font-family:var(--pixel);color:var(--muted);margin-bottom:10px}
+
+/* ---------- modal & toast ---------- */
+#modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px}
+#modal[hidden]{display:none}
+.modal-bg{position:absolute;inset:0;background:rgba(36,64,94,.35)}
+.modal{position:relative;width:min(540px,100%);max-height:calc(100vh - 32px);overflow-y:auto}
+.modal-h{display:flex;align-items:center;margin:-14px -16px 14px;padding:10px 16px;background:#d4edfc;border-bottom:3px solid var(--line)}
+.modal-h h3{flex:1;font-size:17px}
+.modal .x{border:0;background:transparent;cursor:pointer;width:30px;height:30px;display:grid;place-items:center}
+.modal .x:hover{background:#fff}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.modal-actions .sp{flex:1}
+#toasts{position:fixed;top:70px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{font-family:var(--pixel);background:var(--yellow);padding:6px 12px;animation:pop 1.8s steps(6) forwards;box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line),4px 4px 0 2px rgba(36,64,94,.2)}
+.toast.lvup{background:var(--pink);font-size:18px}
+.toast.info{background:var(--paper)}
+@keyframes pop{0%{opacity:0;transform:translateY(10px)}12%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.scrim{display:none}
+
+
+/* ---------- dashboard: strong v1-style pixel frames ---------- */
+#page[data-page=dash] .card{margin:0;border:3px solid var(--line);box-shadow:5px 5px 0 0 #a9d4f1}
+#page[data-page=dash] .card.quest{box-shadow:5px 5px 0 0 var(--blue2)}
+#page[data-page=dash] .card-h{padding-bottom:10px;border-bottom:3px solid var(--line);margin:-14px -16px 12px;padding:10px 16px;background:var(--soft)}
+#page[data-page=dash] .card.quest .card-h{background:#fff1c2}
+#page[data-page=dash] .tile{margin:0;box-shadow:none;border:2px solid var(--line);width:28px;height:28px}
+#page[data-page=dash] .chk{border-width:3px}
+#page[data-page=dash] .qitem{border:2px solid var(--line);background:var(--paper)}
+#page[data-page=dash] .qitem.main{background:#fff6d6;border-width:3px;margin:0 0 10px;box-shadow:4px 4px 0 0 #f0c44c}
+#page[data-page=dash] .qitem.done{background:var(--soft2);border-style:dashed}
+#page[data-page=dash] .qitem .xp{border:2px solid var(--line);background:var(--yellow);color:var(--ink)}
+#page[data-page=dash] .qitem.done .xp{background:var(--green)}
+#page[data-page=dash] .chip{border:2px solid var(--line);background:var(--soft2)}
+#page[data-page=dash] .chip.hot{background:var(--red);color:#fff}
+#page[data-page=dash] .chip.warm{background:var(--orange);color:var(--ink)}
+#page[data-page=dash] .stat3>div{border:2px solid var(--line);background:var(--soft2)}
+#page[data-page=dash] .bar{border:2px solid var(--line);height:14px;background:var(--paper)}
+#page[data-page=dash] .bar.thin{height:12px}
+#page[data-page=dash] .bar>i{background-image:repeating-linear-gradient(90deg,transparent 0 6px,rgba(255,255,255,.45) 6px 8px)}
+#page[data-page=dash] .btn{border-width:3px;box-shadow:3px 3px 0 var(--line)}
+#page[data-page=dash] .btn.w{border-color:var(--line);box-shadow:3px 3px 0 var(--line)}
+#page[data-page=dash] .pinlist li{border:2px solid var(--line)}
+#page[data-page=dash] .review-thumb{border:3px solid var(--line)}
+#page[data-page=dash] .review-thumb:not([style*=url]){border-style:dashed}
+#page[data-page=dash] .allclear{border:2px solid var(--line);background:var(--yellow)}
+#page[data-page=dash] .sched .dot{border:2px solid var(--line);width:12px;height:12px;flex-basis:12px}
+#page[data-page=dash] .kv .dot{border:2px solid var(--line)}
+#page[data-page=dash] .notice{box-shadow:none;border:3px dashed var(--blue2);background:var(--soft2);margin:0 0 20px}
+#page[data-page=dash] input[type=text]{border-color:var(--line)}
+#page[data-page=dash] .qsec::after{border-top-color:var(--edge2)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .dash{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;left:0;top:0;bottom:0;width:232px;transform:translateX(-105%);transition:transform .2s steps(4)}
+  .side.open{transform:none}
+  .scrim.open{display:block;position:fixed;inset:0;background:rgba(36,64,94,.3);z-index:25}
+  .burger{display:inline-flex}
+  .top{padding:8px 14px;gap:10px;flex-wrap:wrap}
+  .lv .bar{width:70px}
+  .lv .exp{display:none}
+  .page{padding:16px 14px 70px}
+  .dash{grid-template-columns:1fr}
+  .span2,.span3{grid-column:auto}
+  .two{grid-template-columns:1fr}
+  .cols4{grid-template-columns:1fr 1fr}
+  .stat4{grid-template-columns:repeat(2,1fr)}
+  .quadwrap{grid-template-columns:20px 1fr 1fr;gap:8px}
+  .zone{padding:8px;min-height:110px}
+  .task{padding:6px;gap:6px}
+  .task .stamp{display:none}
+  .cal .cell{min-height:64px;padding:2px}
+  .cal .ev{font-size:10px;padding:0 2px}
+  .week7{grid-template-columns:1fr}
+  .week7 .day{min-height:0}
+  .catbars .cb{grid-template-columns:70px 1fr 64px}
+}
+@media (max-width:480px){
+  .cols4{grid-template-columns:1fr}
+  .quadwrap .zone .task .meta{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand"><span id="logo"></span><div><b>像素冒險手帳</b><small>PIXEL QUEST DESK</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+  <div class="scrim" id="scrim" data-act="closeSide"></div>
+  <div class="main">
+    <header class="top">
+      <button class="btn sm w burger" data-act="openSide" aria-label="選單"><svg class="pi" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></button>
+      <span class="date" id="topDate"></span>
+      <span class="wk" id="topWeek"></span>
+      <span class="sp"></span>
+      <div class="lv" id="topLv"></div>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+<div id="modal" hidden></div>
+<div id="toasts"></div>
+<input type="file" id="hiddenFile" accept="image/*" hidden>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<script>
+/* =========================================================
+   像素冒險手帳 Pixel Quest Desk — v1
+   ========================================================= */
+
+/* ---------- helpers ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const P = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const TODAY = () => ymd(new Date());
+const addDays = (s, n) => { const d = P(s); d.setDate(d.getDate() + n); return ymd(d); };
+const diffDays = (a, b) => Math.round((P(b) - P(a)) / 86400000);
+const mondayOf = s => { const d = P(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return ymd(d); };
+const wdOf = s => P(s).getDay();             // 0 = Sun
+const WD = ['日', '一', '二', '三', '四', '五', '六'];
+const md = s => { const d = P(s); return `${d.getMonth() + 1}/${d.getDate()}`; };
+const mdw = s => `${md(s)}（${WD[wdOf(s)]}）`;
+const thisYM = () => TODAY().slice(0, 7);
+const ymShift = (ym, n) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + n, 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+const ymLabel = ym => { const [y, m] = ym.split('-'); return `${y} 年 ${+m} 月`; };
+const money = n => (n < 0 ? '-' : '') + '$' + Math.abs(Math.round(n)).toLocaleString();
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function monthCells(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const last = `${ym}-${pad(new Date(y, m, 0).getDate())}`;
+  let d = mondayOf(`${ym}-01`); const cells = [];
+  while (true) { cells.push({ date: d, in: d.slice(0, 7) === ym }); d = addDays(d, 1); if (d > last && cells.length % 7 === 0) break; }
+  return cells;
+}
+
+/* ---------- pixel icons (pixelarticons, MIT © Gerrit Halfmann) ---------- */
+const ICONS = {"home":"M4 20h16v2H4zm16-10h2v10h-2zM2 10h2v10H2zm2-2h2v2H4zm2-2h2v2H6zm2-2h2v2H8zm2-2h4v2h-4zm4 2h2v2h-2zm2 2h2v2h-2zm2 2h2v2h-2zM8 14h2v6H8zm2-2h4v2h-4zm4 2h2v6h-2z","clipboard-note":"M20 12h2v8h-2zm-8-2h8v2h-8zm0 10h8v2h-8zm-2-8h2v8h-2zM6 2h8v2H6zm0 4h8v2H6zm0-2h2v2H6zm6 0h2v2h-2zm2 0h2v2h-2z M16 6h2v5h-2zM4 4h2v2H4zM2 6h2v12H2zm2 12h6v2H4zm2-8h4v2H6zm0 4h2v2H6zm11 2h5v2h-5z M16 16h2v6h-2z","university":"M1 10h2v10H1zm2 10h18v2H3zm18-10h2v10h-2zM3 8h4v2H3zm14 0h4v2h-4zM7 6h2v2H7zm2-2h2v2H9zm2-2h2v2h-2zm2 2h2v2h-2zm2 2h2v2h-2zm-4 2h2v2h-2zm-2 2h2v2H9zm2 2h2v2h-2zm2-2h2v2h-2zm-8 3h2v2H5zm0 4h2v2H5zm12 0h2v2h-2zm0-4h2v2h-2zm-8 5h2v2H9zm0-2h6v2H9zm4 2h2v2h-2z","calendar":"M5 4h14v2H5zm0 16h14v2H5zM3 10h2v10H3zm0-4h2v2H3zm16 0h2v2h-2zm0 4h2v10h-2zM3 8h18v2H3zm12-6h2v2h-2zM7 2h2v2H7z","leaf":"M1 18h2v4H1zm2-2h2v2H3zm2-2h6v2H5zm6-2h2v2h-2zm-6 6h4v2H5zm4 2h4v2H9zm4-2h4v2h-4zm4-2h2v2h-2zm2-8h2v8h-2zm0-4h2v4h-2zm-2-2h2v2h-2zm-4 2h4v2h-4zM7 6h6v2H7zM5 8h2v2H5zm-2 2h2v4H3z","coins":"M6 2h6v2H6zM4 4h2v2H4zm8 0h2v2h-2zm-8 8h2v2H4zm8 0h2v2h-2zm-6 2h6v2H6zM2 6h2v6H2zm12 0h2v6h-2z M14 8h4v2h-4zm-4 10h2v2h-2zm8-8h2v2h-2zm-6 10h2v2h-2zm6-2h2v2h-2z M12 20h6v2h-6zm-4-6h2v4H8zm12-2h2v6h-2zM7 6h4v2H7z M9 6h2v6H9zm6 8h2v4h-2zm-1-2h3v2h-3z","sticky-note-text":"M4 4H2v16h2zm12-2H4v2h12zm6 6h-2v12h2zm-2 12H4v2h16zM18 6h2v2h-2zm-2-2h2v2h-2zm-4 0h2v6h-2zm0 6h8v2h-8zm-6 2h4v2H6zm0 4h6v2H6z","camera":"M4 5h4v2H4zm4-2h8v2H8zm8 2h4v2h-4zM2 7h2v12H2zm2 12h16v2H4zM20 7h2v12h-2zM10 8h4v2h-4zm0 6h4v2h-4zm-2-4h2v4H8zm6 0h2v4h-2z","gear":"M18 22H13V24H11V22H6V20H18V22ZM4 22H2V20H4V22ZM22 22H20V20H22V22ZM6 20H4V18H6V20ZM20 20H18V18H20V20ZM4 18H2V13H0V11H2V6H4V18ZM8 18H6V16H8V18ZM22 11H24V13H22V18H20V13H16V16H8V8H16V11H20V6H22V11ZM10 10V14H14V10H10ZM8 8H6V6H8V8ZM6 6H4V4H6V6ZM20 6H18V4H20V6ZM4 4H2V2H4V4ZM13 2H18V4H6V2H11V0H13V2ZM22 4H20V2H22V4Z","brush":"M7 2h10v2H7zM5 4h2v10H5zm12-2h2v12h-2z M13 2h2v6h-2zM9 2h2v4H9zm-4 8h14v2H5zm2 4h10v2H7zm2 2h2v4H9zm4 0h2v4h-2zm-4 4h6v2H9z","briefcase":"M2 8h2v12H2zm18 0h2v12h-2zM4 6h16v2H4zm0 14h16v2H4zM8 4h2v2H8zm2-2h4v2h-4zm4 2h2v2h-2z","sword":"M11 2h2v2h-2zM9 4h2v12H9zm4 0h2v12h-2zM7 16h10v2H7zm4 2h2v4h-2z","star":"M5 20H8V22H3V16H5V20ZM21 22H16V20H19V16H21V22ZM10 20H8V18H10V20ZM16 20H14V18H16V20ZM14 18H10V16H14V18ZM7 16H5V13H7V16ZM19 16H17V13H19V16ZM5 13H3V11H5V13ZM21 13H19V11H21V13ZM9 9H3V11H1V7H9V9ZM23 11H21V9H15V7H23V11ZM11 7H9V3H11V7ZM15 7H13V3H15V7ZM13 3H11V1H13V3Z","diamond-gem":"M7 1h10v2H7zM5 3h2v2H5zm12 0h2v2h-2zm2 2h2v2h-2zm0 8h2v2h-2zm-2 2h2v2h-2zm-2 2h2v2h-2zm-2 2h2v2h-2zm-2 2h2v2h-2zm-2-2h2v2H9zm-2-2h2v2H7zm-2-2h2v2H5zm-2-2h2v2H3zm0-8h2v2H3zM1 7h2v6H1zm20 0h2v6h-2zM3 9h18v2H3zm6-6h2v3H9zM7 6h2v3H7zm8 0h2v3h-2zm-8 5h2v2H7zm2 2h2v3H9zm2 3h2v3h-2zm2-3h2v3h-2zm2-2h2v2h-2zm-2-8h2v3h-2z","alarm-clock":"M8 5h8v2H8zm0 14h8v2H8zM6 7h2v2H6zm0 10h2v2H6zM16 7h2v2h-2zm0 10h2v2h-2zM4 9h2v8H4zm14 0h2v8h-2zM4 2h2v2H4zm0 17h2v2H4zm14 0h2v2h-2zm0-17h2v2h-2zM2 4h2v2H2zm18 0h2v2h-2zm-9 5h2v4h-2zm2 4h2v2h-2z","compass":"M18 22H6V20H18V22ZM6 20H4V18H6V20ZM20 20H18V18H20V20ZM10 16H12V18H10V19H8V10H10V16ZM4 18H2V6H4V18ZM22 18H20V6H22V18ZM14 16H12V14H14V16ZM16 14H14V8H12V6H14V5H16V14ZM13 13H11V11H13V13ZM12 10H10V8H12V10ZM6 6H4V4H6V6ZM20 6H18V4H20V6ZM18 4H6V2H18V4Z","calendar-text":"M5 4h14v2H5zm0 16h14v2H5zM3 10h2v10H3zm0-4h2v2H3zm16 0h2v2h-2zm0 4h2v10h-2zM3 8h18v2H3zm12-6h2v2h-2zM7 2h2v2H7zm0 10h8v2H7zm0 4h4v2H7z","heart":"M13 22h-2v-2h2v2Zm-2-2H9v-2h2v2Zm4 0h-2v-2h2v2Zm-6-2H7v-2h2v2Zm8 0h-2v-2h2v2ZM7 16H5v-2h2v2Zm12 0h-2v-2h2v2ZM5 14H3v-2h2v2Zm16 0h-2v-2h2v2ZM3 12H1V6h2v6Zm20 0h-2V6h2v6ZM13 8h-2V6h2v2ZM5 6H3V4h2v2Zm6 0H9V4h2v2Zm4 0h-2V4h2v2Zm6 0h-2V4h2v2ZM9 4H5V2h4v2Zm10 0h-4V2h4v2Z","fire":"M9 2h2v4H9zM7 6h2v2H7zM5 8h2v2H5zm8 2h2v2h-2zm2-2h2v2h-2zm2 2h2v2h-2zm2 2h2v6h-2zM3 10h2v8H3zm8-4h2v4h-2zm6 12h2v2h-2zM7 20h10v2H7zm-2-2h2v2H5zm4-2h6v4H9z M11 14h2v3h-2z","plus":"M13 11h7v2h-7v7h-2v-7H4v-2h7V4h2v7Z","close":"M7 19H5V17H7V19ZM19 19H17V17H19V19ZM9 15V17H7V15H9ZM17 17H15V15H17V17ZM11 15H9V13H11V15ZM15 15H13V13H15V15ZM13 13H11V11H13V13ZM11 11H9V9H11V11ZM15 11H13V9H15V11ZM9 9H7V7H9V9ZM17 9H15V7H17V9ZM7 7H5V5H7V7ZM19 7H17V5H19V7Z","chevron-left":"M8 13v-2h2v2H8Zm2-2V9h2v2h-2Zm0 4v-2h2v2h-2Zm2-6V7h2v2h-2Zm0 8v-2h2v2h-2Zm2-10V5h2v2h-2Zm0 12v-2h2v2h-2Z","chevron-right":"M16 13v-2h-2v2h2Zm-2-2V9h-2v2h2Zm0 4v-2h-2v2h2Zm-2-6V7h-2v2h2Zm0 8v-2h-2v2h2ZM10 7V5H8v2h2Zm0 12v-2H8v2h2Z","chevron-down":"M13 16h-2v-2h2v2Zm-2-2H9v-2h2v2Zm4 0h-2v-2h2v2Zm-6-2H7v-2h2v2Zm8 0h-2v-2h2v2ZM7 10H5V8h2v2Zm12 0h-2V8h2v2Z","pencil":"M4 16H6V18H8V20H10V22H2V14H4V16ZM12 20H10V18H12V20ZM14 18H12V16H14V18ZM10 16H8V14H10V16ZM16 16H14V14H16V16ZM6 14H4V12H6V14ZM12 14H10V12H12V14ZM18 14H16V12H18V14ZM8 12H6V10H8V12ZM14 12H12V10H14V12ZM20 12H18V10H20V12ZM10 10H8V8H10V10ZM18 10H16V8H18V10ZM22 10H20V8H22V10ZM12 8H10V6H12V8ZM16 8H14V6H16V8ZM20 8H18V6H20V8ZM14 6H12V4H14V6ZM18 6H16V4H18V6ZM16 4H14V2H16V4Z","trash":"M18 22H6V20H18V22ZM9 6H15V4H17V6H22V8H20V20H18V8H6V20H4V8H2V6H7V4H9V6ZM15 4H9V2H15V4Z","check":"M10 18H8v-2h2v2Zm-2-2H6v-2h2v2Zm4-2v2h-2v-2h2Zm-6 0H4v-2h2v2Zm8 0h-2v-2h2v2Zm2-2h-2v-2h2v2Zm2-2h-2V8h2v2Zm2-2h-2V6h2v2Z","more-horizontal":"M3 9h2v2H3zm8 0h2v2h-2zm8 0h2v2h-2zM1 11h2v2H1zm8 0h2v2H9zm8 0h2v2h-2zM3 13h2v2H3zm8 0h2v2h-2zm8 0h2v2h-2zM5 11h2v2H5zm8 0h2v2h-2zm8 0h2v2h-2z","download":"M21 15v4h-2v-4zm-2 4v2H5v-2zM5 15v4H3v-4zm8-12v14h-2V3z M7 11v2h10v-2zm2 2v2h2v-2zm4 0v2h2v-2z M15 11v2h2v-2z","upload":"M19 21H5v-2h14v2ZM5 19H3v-4h2v4Zm16 0h-2v-4h2v4ZM13 5h2v2h2v2h-4v8h-2V9H7V7h2V5h2V3h2v2Z","user":"M9 2h6v2H9zm0 8h6v2H9zm6-6h2v6h-2zM7 4h2v6H7zM4 18h2v4H4zm14 0h2v4h-2zM8 14h8v2H8zm-2 2h2v2H6zm10 0h2v2h-2z","map-pin":"M7 2h10v2H7zM5 4h2v2H5zm14 0h-2v2h2zM7 17h2v2H7zm2 2h2v2H9zm6-2h2v2h-2zm-2 2h2v2h-2zm-2 2h2v2h-2zm-6-7h2v3H5zm12 0h2v3h-2zM3 6h2v8H3zm18 0h-2v8h2zM10 6h4v2h-4zM8 8h2v4H8zm2 4h4v2h-4zm4-4h2v4h-2z","trophy":"M16 17H13V19H15V21H9V19H11V17H8V15H16V17ZM18 5H22V11H20V7H18V11H20V13H18V15H16V5H8V15H6V13H4V11H6V7H4V11H2V5H6V3H18V5Z","zap":"M4 13h8v6h2v2h-2v2h-2v-8H2v-4h2v2Zm12 6h-2v-2h2v2Zm2-2h-2v-2h2v2Zm2-2h-2v-2h2v2Zm-6-6h8v4h-2v-2h-8V5h-2V3h2V1h2v8Zm-8 2H4V9h2v2Zm2-2H6V7h2v2Zm2-2H8V5h2v2Z","snail":"M20 22H6V20H20V22ZM6 20H4V12H6V20ZM20 16H22V20H20V18H14V16H18V14H20V16ZM12 18H10V16H12V18ZM10 16H8V8H4V6H10V16ZM14 16H12V9H14V16ZM22 14H20V6H22V14ZM4 12H2V8H4V12ZM18 12H16V9H18V12ZM16 9H14V7H16V9ZM12 6H10V4H12V6ZM20 6H18V4H20V6ZM4 4H2V2H4V4ZM8 4H6V2H8V4ZM18 4H12V2H18V4Z","shuffle":"M10 19H2v-2h8v2Zm12 0h-8v-2h8v2Zm-10-2h-2v-6h2v6Zm6-10h2v2h2v2h-2v2h-2v2h-2v-4h-4V9h4V5h2v2ZM8 11H2V9h6v2Z","bed":"M2 4h2v16H2zm18 6h2v10h-2z M2 16h20v2H2zm2-8h16v2H4zm2 2h2v6H6z","coffee":"M4 4h16v2H4zm0 2h2v8H4zm2 8h10v2H6zm14-8h2v4h-2zm-2 4h2v2h-2zm-2-4h2v8h-2zM2 18h18v2H2z","music":"M4 12h4v2H4zm-2 2h2v4H2zm2 4h4v2H4zM8 6h2v12H8zm10 0h2v12h-2zm-6 8h2v4h-2zm2-2h4v2h-4zm0 6h4v2h-4zM10 4h8v2h-8z","book-open":"M2 3h9v2H2zM0 19h11v2H0zM13 3h9v2h-9zm0 16h11v2H13zM11 5h2v18h-2zM0 5h2v14H0zm22 0h2v14h-2zm-7 2h5v2h-5zm0 4h5v2h-5zm0 4h2v2h-2z","human-arms-up":"M10 2h4v4h-4zM7 7h10v2H7zm2 2h2v7H9zm4 0h2v7h-2zm-4 7h2v6H9zm4 0h2v6h-2zm-2-2h2v2h-2zM5 5h2v2H5zM3 3h2v2H3zm14 2h2v2h-2zm2-2h2v2h-2z","moon":"M18 22H8v-2h10v2ZM8 20H6v-2h2v2Zm12 0h-2v-2h2v2ZM6 18H4v-2h2v2Zm16 0h-2v-4h-2v-2h2v-2h2v8ZM4 16H2V6h2v10Zm14 0h-6v-2h6v2Zm-6-2h-2v-2h2v2Zm-2-2H8V6h2v6ZM6 6H4V4h2v2Zm8-2h-2v2h-2V4H6V2h8v2Z","sun":"M13 22h-2v-3h2v3Zm-6-3H5v-2h2v2Zm12 0h-2v-2h2v2Zm-4-2H9v-2h6v2Zm-6-2H7V9h2v6Zm8 0h-2V9h2v6ZM5 13H2v-2h3v2Zm17 0h-3v-2h3v2Zm-7-4H9V7h6v2ZM7 7H5V5h2v2Zm12 0h-2V5h2v2Zm-6-2h-2V2h2v3Z","waves":"M2 18h4v-2H2zm0-6h4v-2H2zm0-6h4V4H2zm4 14h4v-2H6zm0-6h4v-2H6zm0-6h4V6H6zm4 10h4v-2h-4zm0-6h4v-2h-4zm0-6h4V4h-4zm4 14h4v-2h-4zm0-6h4v-2h-4zm0-6h4V6h-4zm4 10h4v-2h-4zm0-6h4v-2h-4zm0-6h4V4h-4z","gamepad":"M4 4h16v2H4zm0 14h16v2H4zM2 6h2v12H2zm18 0h2v12h-2zM8 9h2v6H8z M6 11h6v2H6zm8-2h2v2h-2zm2 4h2v2h-2z","shopping-bag":"M3 6h18v2H3zm2 14h14v2H5zM3 8h2v12H3zm16 0h2v12h-2z M7 4h2v6H7zm2-2h6v2H9zm6 2h2v6h-2z","bus":"M4 15h6v2H4zm10 0h6v2h-6zM4 19h6v2H4zm10 0h6v2h-6zM0 7h2v10H0zm2-2h18v2H2zm20 4h2v8h-2zM2 11h20v2H2zm2 6h2v2H4zm4 0h8v2H8zm-6 0h2v2H2zm16 0h4v2h-4zm2-10h2v2h-2zm-6 0h2v4h-2zM7 7h2v4H7z","box":"M14 4h4v2h-4zm-4-2h4v2h-4zM6 8h4v2H6zm0 10h4v2H6zm4-8h4v2h-4zm0 10h4v2h-4zm4-12h4v2h-4zm0 10h4v2h-4zM6 4h4v2H6zM2 6h4v2H2zm0 10h4v2H2zM18 6h4v2h-4zm0 10h4v2h-4z M2 6h2v12H2zm18 0h2v12h-2zm-8 6h2v8h-2z","wallet":"M18 5h2v2h-2zM4 3h14v2H4zM2 5h2v14H2zm2 14h16v2H4zm12-4h6v2h-6zm0-4h6v2h-6zm-2 0h2v6h-2z M20 7h2v12h-2zM4 7h16v2H4z","sparkle":"M11 1h2v4h-2zm0 22h2v-4h-2zM9 5h2v4H9zm0 14h2v-4H9zm4-14h2v4h-2zm0 14h2v-4h-2zM5 9h4v2H5zm14 0h-4v2h4zM1 11h4v2H1zm22 0h-4v2h4zM5 13h4v2H5zm14 0h-4v2h4z","sparkles":"M11 1h2v4h-2zm0 22h2v-4h-2zM9 5h2v4H9zm0 14h2v-4H9zm4-14h2v4h-2zm0 14h2v-4h-2zM5 9h4v2H5zm14 0h-4v2h4zM1 11h4v2H1zm22 0h-4v2h4zM5 13h4v2H5zm14 0h-4v2h4zm0-12h2v6h-2z M17 3h6v2h-6zM3 17h2v2H3zm-2 2h2v2H1zm2 2h2v2H3zm2-2h2v2H5z","dog":"M14 22H10V20H14V22ZM16 20H14V18H10V20H8V18H5V16H11V14H13V16H19V18H16V20ZM3 10H5V16H3V12H1V6H3V10ZM23 12H21V16H19V10H21V6H23V12ZM11 12H9V8H11V12ZM15 12H13V8H15V12ZM7 10H5V6H7V10ZM19 10H17V6H19V10ZM5 6H3V4H5V6ZM19 4H17V6H15V4H9V6H7V4H5V2H19V4ZM21 6H19V4H21V6Z","target":"M5 1h14v2H5zM3 3h2v2H3zm0 16h2v2H3zm16 0h2v2h-2zm0-16h2v2h-2zm2 2h2v14h-2zM5 21h14v2H5zM1 5h2v14H1zm8 0h6v2H9zM5 9h2v6H5zm4 8h6v2H9zm8-8h2v6h-2zm-6 0h2v2h-2zM7 7h2v2H7zm0 8h2v2H7zm8 0h2v2h-2zm0-8h2v2h-2zm-6 4h2v2H9zm2 2h2v2h-2zm2-2h2v2h-2z","smile":"M6 20h12v2H6zM6 2h12v2H6zm12 2h2v2h-2zM4 4h2v2H4zm0 14h2v2H4zm14 0h2v2h-2zM2 6h2v12H2zm18 0h2v12h-2zM7 13h2v2H7zm2 2h6v2H9zm6-2h2v2h-2zM8 8h2v2H8zm6 0h2v2h-2z","notebook":"M6 2h14v2H6zm0 18h14v2H6zM20 4h2v16h-2zM4 4h2v16H4z M2 7h6v2H2zm0 4h6v2H2zm0 4h6v2H2zM16 4h2v16h-2z","bookmark":"M6 2h12v2H6zM4 4h2v18H4zm14 0h2v18h-2zm-2 16h2v2h-2zm-2-2h2v2h-2zm-8 2h2v2H6zm2-2h2v2H8zm2-2h4v2h-4z","lightbulb":"M9 4h6v2H9zM7 6h2v2H7zm8 0h2v2h-2zm4-2h2v2h-2zm2-2h2v2h-2zM0 10h3v2H0zm21 0h3v2h-3zM3 4h2v2H3zM1 2h2v2H1zm6 12h2v2H7zm8 0h2v2h-2zM5 8h2v6H5zm12 0h2v6h-2zm-8 8h6v2H9zm0 4h6v2H9zm0-2h2v2H9zm4 0h2v2h-2zM11 0h2v3h-2z","party-popper":"M4 20H6V22H2V18H4V20ZM20 21H18V19H20V21ZM10 20H6V18H10V20ZM6 18H4V14H6V18ZM14 18H10V16H14V18ZM10 16H8V14H10V16ZM16 16H14V12H16V16ZM22 16H20V14H22V16ZM8 14H6V10H8V14ZM20 14H18V12H20V14ZM14 12H12V10H14V12ZM12 10H8V8H12V10ZM20 9H16V7H20V9ZM5 8H3V6H5V8ZM22 7H20V5H22V7ZM12 6H10V4H12V6ZM10 4H8V2H10V4ZM17 4H15V2H17V4Z","inbox":"M2 4h2v16H2zm2 16h16v2H4zM20 4h2v16h-2zM4 2h16v2H4zm0 12h4v2H4zm4 2h8v2H8zm8-2h4v2h-4z","teach":"M3 2h4v4H3zM2 8h12v2H2zm7-4h11v2H9zm1 10h10v2H10z M2 9h6v7H2zm0 7h2v4H2zm4 0h2v4H6zM20 6h2v8h-2z","hourglass":"M16 22H8v-2h8v2Zm-8-2H6v-4h2v4Zm10 0h-2v-4h2v4Zm-8-4H8v-2h2v2Zm6 0h-2v-2h2v2Zm-6-6h4v4h-4v-4Zm0 0H8V8h2v2Zm6 0h-2V8h2v2ZM8 8H6V4h2v4Zm10 0h-2V4h2v4Zm-2-4H8V2h8v2Z","clock":"M6 2h12v2H6zM2 6h2v12H2zm18 0h2v12h-2zm-2-2h2v2h-2zM4 4h2v2H4zm2 18h12v-2H6zm12-2h2v-2h-2zM4 20h2v-2H4zm7-14h2v7h-2zm2 7h2v2h-2zm2 2h2v2h-2z","image":"M4 2h16v2H4zm0 18h16v2H4zM2 4h2v16H2zm18 0h2v16h-2zm-4 8h2v2h-2zm-2 2h2v2h-2zm4 0h2v2h-2zm-8 0h2v2h-2zm2 2h2v2h-2zm2 2h2v2h-2z M20 16h2v2h-2zM8 16h2v2H8zm-2 2h2v2H6zM8 6h2v2H8zM6 8h2v2H6zm2 2h2v2H8zm2-2h2v2h-2z","tea":"M4 6h16v2H4zm0 2h2v10H4zm2 10h10v2H6zM20 8h2v4h-2zm-2 4h2v2h-2zm-2-4h2v10h-2zM7 2h2v2H7zm6 0h2v2h-2zM9 0h2v2H9zm6 0h2v2h-2zm-5 8h2v4h-2zm-2 4h6v4H8z","mug":"M16 19H6V17H16V19ZM18 11H20V13H18V17H16V7H6V17H4V5H20V7H18V11ZM22 11H20V7H22V11Z","cake":"M1 20h22v2H1zm2-8h2v8H3zm2-2h14v2H5zm14 2h2v8h-2zm-8-5h2v3h-2zM7 7h2v3H7zm8 0h2v3h-2zM7 3h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM5 14h2v2H5zm2 2h4v2H7zm4-2h6v2h-6zm6 2h2v2h-2z","tree-pine":"M11 2h2v2h-2zM9 4h2v2H9zm4 0h2v2h-2zm2 2h2v2h-2zM7 6h2v2H7zm0 4h2v2H7zm-2 2h2v2H5zm2 2h2v2H7zm-2 2h2v2H5zm-2 2h18v2H3zM13 8h2v2h-2zm2 2h2v2h-2zM9 8h2v2H9zm8 4h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm-6 4h2v2h-2z","flag":"M4 2h2v20H4z M4 4h16v2H4zm12 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zM4 12h16v2H4z","goal":"M6 2h2v2H6zm0 18h12v2H6zm12-2h2v2h-2zM4 18h2v2H4zM4 4h2v2H4zm16 10h2v4h-2zM2 6h2v12H2zm6 10h8v2H8zM6 8h2v8H6zm10 6h2v2h-2zM10 2h2v12h-2z M10 2h6v2h-6zm0 6h6v2h-6zm6-4h6v2h-6zm0 6h6v2h-6zm4-4h2v4h-2z","list-box":"M4 2h16v2H4zm2 5h2v2H6zm4 0h8v2h-8zm-4 4h2v2H6zm4 0h8v2h-8zm-4 4h2v2H6zm4 0h8v2h-8zm-6 5h16v2H4zM2 4h2v16H2zm18 0h2v16h-2z","sliders":"M8 14H7v6H5v-6H2v-2h6v2Zm5 6h-2V10h2v10Zm9-2h-3v2h-2v-2h-1v-2h6v2Zm-3-4h-2V4h2v10ZM7 10H5V4h2v6Zm6-4h2v2H9V6h2V4h2v2Z","scroll-vertical":"M21 8h-2V4h2zM5 8H3V4h2zm16 6h-2v-4h2zM5 14H3v-4h2zm16 6h-2v-4h2zM5 20H3v-4h2zm10-2H9v2h6z M13 2h-2v20h2z M17 16H7v2h10zM15 6H9V4h6zm2 2H7V6h10z","crown":"M3 3h2v12H3zm16 0h2v12h-2zm-8 0h2v2h-2zM9 5h2v2H9zM5 5h2v2H5z M3 3h2v2H3zm4 4h2v2H7zm6-2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zM5 15h14v2H5zm-2 4h18v2H3z","potion":"M8 6h8v2H8zm0-4h8v2H8zm0 6h2v2H8zm6 0h2v2h-2zM6 20h12v2H6zm-2-8h2v8H4zm14 0h2v8h-2zM6 10h2v2H6zm10 0h2v2h-2zM6 4h2v2H6zm10 0h2v2h-2z","chart-bar-big":"M4 20h18v2H4zM2 2h2v18H2zm16 11v3h-2v-3zM8 13v3H6v-3zm8-2v2H8v-2zm0 5v2H8v-2zm4-12v3h-2V4zM8 4v3H6V4zm10-2v2H8V2zm0 5v2H8V7z","menu":"M20 18H4v-2h16v2Zm0-5H4v-2h16v2Zm0-5H4V6h16v2Z","dollar":"M17 18h-4v4h-2v-4H7v-2h10v2Zm2-2h-2v-3h2v3Zm-2-3H7v-2h10v2ZM7 11H5V8h2v3Zm6-5h4v2H7V6h4V2h2v4Z","note":"M2 4h2v16H2zm18 0h2v12h-2zM4 2h16v2H4zm14 14h2v2h-2zm-2 2h2v2h-2zM4 20h12v2H4zm10-8h6v2h-6zm-2 2h2v6h-2z","receipt":"M3 2h2v18H3zm16 0h2v18h-2zM5 4h2v2H5zm4 0h2v2H9zM5 20h14v2H5zm8-16h2v2h-2zM7 2h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm2 2h2v2h-2zM7 8h10v2H7zm0 4h10v2H7zm0 4h4v2H7z"};
+const ic = (n, cls = '') => `<svg class="pi ${cls}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${ICONS[n] || ICONS.star}"/></svg>`;
+const tile = (n, color = 'var(--soft)', cls = '') => `<span class="tile ${cls}" style="background:${color}">${ic(n)}</span>`;
+
+/* ---------- constants ---------- */
+const QUAD = { q1: '緊急且重要', q2: '重要不緊急', q3: '緊急不重要', q4: '不緊急不重要' };
+const QICON = { q1: ['fire', '#ffd2da'], q2: ['star', '#d6edfc'], q3: ['zap', '#ffe9c7'], q4: ['snail', '#eceff3'] };
+const QSHORT = { q1: '急・重', q2: '重要', q3: '緊急', q4: '可緩' };
+const HZ = { any: '隨時可完成', week: '一週內', month: '一個月內', year: '一年內' };
+const HICON = { any: ['inbox', '#e3f3ea'], week: ['calendar-text', '#d6edfc'], month: ['calendar', '#fff1c2'], year: ['flag', '#f0e6ff'] };
+const HZSHORT = { any: '隨時', week: '週計劃', month: '月計劃', year: '年目標' };
+const OUT_CATS = { 餐飲: 'coffee', 交通: 'bus', 購物: 'shopping-bag', 娛樂: 'gamepad', 學習: 'book-open', 才藝: 'brush', 生活: 'home', 其他: 'box' };
+const IN_CATS = { 零用錢: 'wallet', 打工: 'briefcase', 獎學金: 'trophy', 其他收入: 'sparkle' };
+const CAT_COLORS = { 餐飲: '#ffe2b8', 交通: '#d6edfc', 購物: '#ffd8e0', 娛樂: '#e8dcff', 學習: '#dff3e2', 才藝: '#fff1c2', 生活: '#d9f2f0', 其他: '#eceff3', 零用錢: '#dff3e2', 打工: '#d6edfc', 獎學金: '#fff1c2', 其他收入: '#ffd8e0' };
+const COLORS = ['#9ad3f7', '#ffd866', '#ff9fb2', '#86d595', '#c7a8f5', '#ffb36b', '#7fd8d0', '#d9dee4'];
+const NOTE_COLORS = ['#fff6c9', '#e1f1fd', '#ffe3e9', '#e2f6e5', '#efe6fd', '#ffffff'];
+const H_ICONS = ['waves', 'human-arms-up', 'book-open', 'heart', 'leaf', 'moon', 'music', 'pencil', 'coffee', 'sun', 'dog', 'brush', 'target', 'smile', 'notebook', 'bed'];
+const EMOJI2ICON = { '💧': 'waves', '🏃': 'human-arms-up', '📖': 'book-open', '🧘': 'heart', '🥗': 'leaf', '😴': 'bed', '🎸': 'music', '✍️': 'pencil', '🧹': 'home', '💊': 'potion', '🌱': 'leaf', '⭐': 'star', '🐱': 'dog', '🎨': 'brush', '🦷': 'smile', '📵': 'moon' };
+const FREQ = { daily: '每日', weekly: '每週', monthly: '每月', custom: '自訂' };
+const EXP = { main: 30, quest: 15, task: 10, habit: 5, log: 10 };
+const HOBBY_KINDS = { class: '上課', practice: '練習', self: '自學' };
+const NAV = [
+  ['dash', 'home', '儀表板', '#fff1c2'], ['tasks', 'clipboard-note', '待辦清單', '#ffe3e9'], ['courses', 'university', '課程管理', '#d6edfc'],
+  ['hobby', 'brush', '自我學習', '#efe6fd'], ['work', 'briefcase', '工作', '#ffe2b8'], ['cal', 'calendar', '行事曆', '#e2f6e5'],
+  ['habits', 'leaf', '習慣打卡', '#dff3e2'], ['money', 'coins', '記帳', '#fff1c2'], ['notes', 'sticky-note-text', '筆記', '#e1f1fd'],
+  ['review', 'camera', '每日回顧', '#ffe3e9'], ['settings', 'gear', '設定', '#eceff3']
+];
+
+/* ---------- pixel mascot ---------- */
+function slime(scale = 3, mood = 'happy') {
+  const rows = [
+    '.....XXXX.....',
+    '...XXBBBBXX...',
+    '..XBBBWWBBBX..',
+    '.XBBBBBWBBBBX.',
+    '.XBBKBBBBKBBX.',
+    'XBBBKBBBBKBBBX',
+    'XBPPBBMMBBPPBX',
+    'XBBBBBBBBBBBBX',
+    '.XXXXXXXXXXXX.'];
+  if (mood === 'sleep') { rows[4] = '.XBBBBBBBBBBX.'; rows[5] = 'XBBKKBBBBKKBBX'; }
+  const col = { X: '#203650', B: '#9ad3f7', W: '#ffffff', K: '#203650', P: '#ff9fb2', M: '#203650' };
+  let r = '';
+  rows.forEach((row, y) => [...row].forEach((c, x) => { if (c !== '.') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${col[c]}"/>`; }));
+  return `<svg width="${14 * scale}" height="${9 * scale}" viewBox="0 0 14 9" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+
+/* ---------- state ---------- */
+const KEY = 'pixel-quest-desk-v1';
+const DEFAULT = () => ({
+  tasks: [], courses: [], hobbies: [], jobs: [], events: [], habits: [], money: [], notes: [], reviews: {},
+  daily: {}, exp: 0, seeded: false, sampleNotice: false,
+  settings: { semStart: '2026-09-07', budget: 8000, taskView: 'quad', hideDone: false, calView: 'month' }
+});
+let S;
+function load() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(KEY)); } catch (e) { }
+  S = Object.assign(DEFAULT(), raw || {});
+  S.settings = Object.assign(DEFAULT().settings, S.settings || {});
+  if (!raw) seed();
+  else if (raw.seeded && raw.sampleNotice && !raw.hobbies) seedV2();   // v1 sample data → add v2 samples
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('儲存失敗，瀏覽器空間可能不足', 'info'); }
+}
+const UI = { calYM: thisYM(), calWeek: mondayOf(TODAY()), revYM: thisYM(), monYM: thisYM(), course: null, hobby: null, job: null, hMonth: {}, mCat: null };
+
+/* ---------- photos (IndexedDB) ---------- */
+const PHOTOS = {};
+const DB = {
+  db: null,
+  open() {
+    return new Promise(res => {
+      try {
+        const rq = indexedDB.open('pixel-quest-desk', 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore('photos');
+        rq.onsuccess = () => { this.db = rq.result; res(); };
+        rq.onerror = () => res();
+      } catch (e) { res(); }
+    });
+  },
+  tx(mode) { return this.db.transaction('photos', mode).objectStore('photos'); },
+  put(k, v) { return new Promise((res, rej) => { if (!this.db) return rej(); const r = this.tx('readwrite').put(v, k); r.onsuccess = res; r.onerror = rej; }); },
+  del(k) { return new Promise(res => { if (!this.db) return res(); const r = this.tx('readwrite').delete(k); r.onsuccess = res; r.onerror = res; }); },
+  clear() { return new Promise(res => { if (!this.db) return res(); const r = this.tx('readwrite').clear(); r.onsuccess = res; r.onerror = res; }); },
+  all() {
+    return new Promise(res => {
+      const out = {}; if (!this.db) return res(out);
+      const r = this.tx('readonly').openCursor();
+      r.onsuccess = () => { const c = r.result; if (c) { out[c.key] = c.value; c.continue(); } else res(out); };
+      r.onerror = () => res(out);
+    });
+  }
+};
+async function loadPhotos() {
+  const all = await DB.all();
+  for (const k in all) PHOTOS[k] = URL.createObjectURL(all[k]);
+}
+function compress(file) {
+  return new Promise((res, rej) => {
+    const img = new Image(); const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const M = 1000, s = Math.min(1, M / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? res(b) : rej(), 'image/jpeg', 0.8);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(); };
+    img.src = url;
+  });
+}
+async function setPhoto(date, file) {
+  try {
+    const blob = await compress(file);
+    await DB.put(date, blob);
+    if (PHOTOS[date]) URL.revokeObjectURL(PHOTOS[date]);
+    PHOTOS[date] = URL.createObjectURL(blob);
+    S.reviews[date] = Object.assign({ note: '' }, S.reviews[date], { photo: true });
+    save(); toast('照片已貼上', 'info'); return true;
+  } catch (e) { toast('這張照片讀不進來，換一張試試', 'info'); return false; }
+}
+
+/* ---------- references (tasks + course homework) ---------- */
+function refOf(ref) {
+  if (ref.startsWith('t:')) {
+    const t = S.tasks.find(x => x.id === ref.slice(2));
+    return t && { ref, title: t.title, ddl: t.ddl, done: t.done, obj: t, kind: 'task' };
+  }
+  const [, cid, hid] = ref.split(':');
+  const c = S.courses.find(x => x.id === cid); const h = c && c.hw.find(x => x.id === hid);
+  return h && { ref, title: h.title, ddl: h.ddl, done: h.done, obj: h, kind: 'hw', course: c };
+}
+const allRefs = () => [...S.tasks.map(t => 't:' + t.id), ...S.courses.flatMap(c => c.hw.map(h => `h:${c.id}:${h.id}`))];
+const QR = { q1: 0, q3: 1, q2: 2, q4: 3 }, HR = { week: 0, month: 1, any: 2, year: 3 };
+function rankKey(r) {
+  const o = r.obj;
+  const q = r.kind === 'hw' ? 2 : (o.quad ? QR[o.quad] : 4);
+  const h = r.kind === 'hw' ? 4 : (o.hz ? HR[o.hz] : 4);
+  return [r.ddl ? diffDays(TODAY(), r.ddl) : 99999, q, h];
+}
+const cmpRank = (a, b) => { const x = rankKey(a), y = rankKey(b); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
+
+/* ---------- daily main quest + side quests ---------- */
+function ensureDaily() {
+  const td = TODAY();
+  let D = S.daily;
+  if (D.date !== td) D = S.daily = { date: td, main: [], quests: [], rerolled: false, picked: false };
+  D.main = D.main.filter(r => refOf(r));
+  D.quests = D.quests.filter(r => refOf(r));
+  const open = allRefs().map(refOf).filter(r => !r.done);
+  open.filter(r => r.ddl && r.ddl <= td).sort((a, b) => a.ddl.localeCompare(b.ddl))
+    .forEach(r => { if (!D.main.includes(r.ref)) D.main.push(r.ref); });
+  if (!D.main.length && !D.picked) {
+    const c = open.filter(r => r.ddl || (r.kind === 'task' && (r.obj.quad || r.obj.hz))).sort(cmpRank)[0];
+    if (c) { D.main.push(c.ref); D.picked = true; }
+  }
+  D.quests = D.quests.filter(r => !D.main.includes(r));
+  const n = Math.max(2, 4 - Math.max(0, D.main.length - 1));
+  while (D.quests.length > n) {
+    const i = D.quests.map(refOf).findLastIndex(r => !r.done);
+    if (i < 0) break; D.quests.splice(i, 1);
+  }
+  if (D.quests.length < n) questPool(D).slice(0, n - D.quests.length).forEach(r => D.quests.push(r));
+}
+function questPool(D, exclude = []) {
+  const taken = new Set([...D.main, ...D.quests, ...exclude]);
+  const free = S.tasks.filter(t => !t.done && !taken.has('t:' + t.id));
+  const a = shuffle(free.filter(t => !t.quad && !t.hz).map(t => 't:' + t.id));
+  const b = shuffle(free.filter(t => !t.quad && t.hz === 'any').map(t => 't:' + t.id));
+  return [...a, ...b];
+}
+
+/* ---------- exp ---------- */
+const level = () => Math.floor(S.exp / 100) + 1;
+function gainExp(n) {
+  const before = level();
+  S.exp = Math.max(0, S.exp + n);
+  if (n > 0) toast(`+${n} EXP`);
+  if (level() > before) setTimeout(() => toast(`LEVEL UP!  Lv.${level()}`, 'lvup'), 350);
+}
+function toggleRef(ref) {
+  const r = refOf(ref); if (!r) return;
+  const o = r.obj; o.done = !o.done;
+  if (o.done) {
+    const D = S.daily;
+    const g = D.main.includes(ref) ? EXP.main : D.quests.includes(ref) ? EXP.quest : EXP.task;
+    o.doneAt = TODAY(); o.exp = g; gainExp(g);
+  } else { gainExp(-(o.exp || 0)); o.exp = 0; o.doneAt = null; }
+  commit();
+}
+
+/* ---------- toast & modal ---------- */
+function toast(msg, cls = '') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + cls; t.textContent = msg;
+  $('#toasts').appendChild(t); setTimeout(() => t.remove(), 1900);
+}
+function openModal(title, body) {
+  const m = $('#modal');
+  m.innerHTML = `<div class="modal-bg" data-act="closeModal"></div>
+    <div class="modal card" role="dialog" aria-modal="true"><div class="modal-h"><h3>${title}</h3><button class="x" data-act="closeModal" aria-label="關閉">${ic('close')}</button></div>${body}</div>`;
+  m.hidden = false;
+  setTimeout(() => { const f = m.querySelector('input[type=text],textarea'); if (f && matchMedia('(min-width:821px)').matches) f.focus(); }, 30);
+}
+function closeModal() { const m = $('#modal'); m.hidden = true; m.innerHTML = ''; }
+
+/* ---------- small renderers ---------- */
+function ddlChip(ddl, done) {
+  if (!ddl) return '';
+  if (done) return `<span class="chip">${md(ddl)}</span>`;
+  const n = diffDays(TODAY(), ddl);
+  const txt = n < 0 ? `逾期 ${-n} 天` : n === 0 ? '今天到期' : n === 1 ? '明天' : `D-${n}`;
+  const cls = n <= 0 ? 'hot' : n <= 3 ? 'warm' : '';
+  return `<span class="chip ${cls}" title="${ddl}">${txt}</span>`;
+}
+const cardH = (icon, color, title, go, extra = '') =>
+  `<div class="card-h" ${go ? `data-go="${go}"` : ''}>${tile(icon, color)}<h3>${title}</h3>${extra}${go ? `<span class="more">${ic('chevron-right')}</span>` : ''}</div>`;
+function taskItem(t, opt = {}) {
+  const ref = 't:' + t.id;
+  const tags = [];
+  if (opt.showQuad && t.quad) tags.push(`<span class="chip">${QSHORT[t.quad]}</span>`);
+  if (opt.showHz && t.hz) tags.push(`<span class="chip">${HZSHORT[t.hz]}</span>`);
+  if (S.daily.main.includes(ref)) tags.push(`<span class="chip y">${ic('star')}主線</span>`);
+  else if (S.daily.quests.includes(ref)) tags.push(`<span class="chip y">${ic('diamond-gem')}委託</span>`);
+  return `<div class="task ${t.done ? 'done' : ''}" draggable="true" data-drag="${t.id}">
+    <button class="chk" data-act="toggle" data-ref="${ref}" aria-label="完成">${ic('check')}</button>
+    <div class="tt"><div class="name">${esc(t.title)}</div>
+      ${(t.ddl || tags.length) ? `<div class="meta">${ddlChip(t.ddl, t.done)}${tags.join('')}</div>` : ''}</div>
+    ${t.done ? '<span class="stamp">CLEAR!</span>' : ''}
+    <button class="iconbtn" data-act="editTask" data-id="${t.id}" aria-label="編輯">${ic('more-horizontal')}</button></div>`;
+}
+const semWeek = (date = TODAY()) => Math.floor(diffDays(S.settings.semStart, date) / 7) + 1;
+const KIND = { course: ['university', '學校'], hobby: ['brush', '才藝'], job: ['briefcase', '工作'] };
+function scheduleOn(date, kinds = ['course', 'hobby', 'job']) {
+  const jd = wdOf(date), lists = { course: S.courses, hobby: S.hobbies, job: S.jobs };
+  return kinds.flatMap(k => lists[k].flatMap(x => (x.slots || []).filter(s => (s.day % 7) === jd)
+    .map(s => ({ kind: k, obj: x, start: s.start, end: s.end, title: x.name, sub: x.room || x.place || '', color: x.color }))))
+    .sort((a, b) => a.start.localeCompare(b.start));
+}
+const ddlsOn = date => allRefs().map(refOf).filter(r => r.ddl === date);
+const eventsOn = date => S.events.filter(e => e.date === date).sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
+const hIcon = h => ICONS[h.icon] ? h.icon : (EMOJI2ICON[h.icon] || 'star');
+const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const hrs = (a, b) => Math.max(0, (toMin(b) - toMin(a)) / 60);
+const fmtH = h => (Math.round(h * 10) / 10) + ' 小時';
+const fmtMin = m => m >= 60 ? `${Math.floor(m / 60)} 小時${m % 60 ? ' ' + (m % 60) + ' 分' : ''}` : `${m} 分`;
+function swatches(id, sel, n = COLORS.length) {
+  return `<div class="swatches" id="${id}">${COLORS.slice(0, n).map(x => `<button class="sw ${x === sel ? 'on' : ''}" style="background:${x}" data-act="pickSw" data-color="${x}" aria-label="顏色"></button>`).join('')}</div>`;
+}
+function slotEditor(slots) {
+  const row = s => `<div class="slot-row"><select class="sDay">${[1, 2, 3, 4, 5, 6, 7].map(d => `<option value="${d}" ${s.day === d ? 'selected' : ''}>週${WD[d % 7]}</option>`).join('')}</select>
+    <input type="time" class="sStart" value="${s.start}"><span class="muted">–</span><input type="time" class="sEnd" value="${s.end}"><button class="iconbtn" data-act="rmSlot" aria-label="移除">${ic('close')}</button></div>`;
+  UI.slotTpl = row({ day: 1, start: '09:10', end: '11:00' });
+  return `<div id="slots">${slots.map(row).join('')}</div><div><button class="btn sm w" data-act="addSlot">${ic('plus')} 加一個時段</button></div>`;
+}
+const readSlots = () => $$('#slots .slot-row').map(r => ({ day: +$('.sDay', r).value, start: $('.sStart', r).value || '09:00', end: $('.sEnd', r).value || '10:00' })).filter(s => s.end > s.start);
+
+/* ===================================================================
+   PAGES
+   =================================================================== */
+const PAGES = {};
+
+/* ---------- dashboard ---------- */
+PAGES.dash = () => {
+  const td = TODAY(), D = S.daily, jsd = wdOf(td);
+  const h = new Date().getHours();
+  const hi = h < 5 ? '夜深了' : h < 11 ? '早安' : h < 14 ? '午安' : h < 18 ? '午後好' : '晚安';
+  const sch = scheduleOn(td), evs = eventsOn(td);
+  const mains = D.main.map(refOf), quests = D.quests.map(refOf);
+  const all = [...mains, ...quests], doneN = all.filter(r => r.done).length;
+  const dueSoon = allRefs().map(refOf).filter(r => !r.done && r.ddl).sort((a, b) => a.ddl.localeCompare(b.ddl)).slice(0, 5);
+  const todayDue = dueSoon.filter(r => r.ddl <= td).length;
+  const nClass = sch.filter(x => x.kind === 'course').length, nOther = sch.length - nClass;
+
+  const qrow = (r, main) => `<div class="qitem ${main ? 'main' : ''} ${r.done ? 'done' : ''}">
+      <button class="chk" data-act="toggle" data-ref="${r.ref}" aria-label="完成">${ic('check')}</button>
+      <span class="ico">${ic(main ? 'star' : 'diamond-gem')}</span>
+      <div class="tt"><span class="nm">${esc(r.title)}</span> ${r.course ? `<span class="chip">${esc(r.course.name)}</span>` : ''} ${ddlChip(r.ddl, r.done)}</div>
+      <span class="xp">${r.done ? 'CLEAR' : '+' + (main ? EXP.main : EXP.quest)}</span></div>`;
+
+  const items = [
+    ...sch.map(x => ({ t: `${x.start}–${x.end}`, k: x.start, title: x.title, sub: x.sub, color: x.color, kind: x.kind })),
+    ...evs.map(e => ({ t: e.time || '全天', k: e.time || '00:00', title: e.title, sub: '', color: e.color, kind: 'event' }))
+  ].sort((a, b) => a.k.localeCompare(b.k));
+
+  const plan = k => { const l = S.tasks.filter(t => t.hz === k); return [l.filter(t => t.done).length, l.length]; };
+  const daysLeftW = 7 - ((jsd + 6) % 7);
+  const [Y, M] = td.split('-').map(Number), dim = new Date(Y, M, 0).getDate();
+  const hab = S.habits.filter(x => !x.archived && habitDueToday(x));
+  const mm = monthMoney(thisYM());
+  const pins = [...S.notes].sort((a, b) => (b.pinned - a.pinned) || (b.updatedAt - a.updatedAt)).slice(0, 3);
+  const rv = S.reviews[td];
+  const wk0 = mondayOf(td);
+  const hobbies = S.hobbies.filter(x => !x.archived);
+
+  return `
+  ${S.sampleNotice ? `<div class="notice">${slime(3)}<p>目前顯示的是<b>範例資料</b>，讓你先看看各功能長什麼樣子。準備好開始用了，就到「設定」清除範例資料。</p>
+    <button class="btn sm w" data-act="hideNotice">知道了</button><button class="btn sm pk" data-act="go" data-page="settings">去清除</button></div>` : ''}
+  <div class="hello">${slime(4, h < 5 || h >= 23 ? 'sleep' : 'happy')}
+    <div><h2>${hi}！今天是 ${mdw(td)}</h2>
+    <p class="muted">今天有 <b>${nClass}</b> 堂課${nOther ? `、<b>${nOther}</b> 個才藝或工作` : ''}、<b>${evs.length}</b> 個行程、<b>${todayDue}</b> 個今天到期。主線 <b>${mains.length}</b> 件、委託 <b>${quests.length}</b> 件，一件一件來就好。</p></div></div>
+  <div class="dash">
+    <section class="card span2 quest">
+      ${cardH('sword', '#fff1c2', '今日任務', '', `<button class="btn sm ${D.rerolled ? 'w' : 'y'}" data-act="reroll" ${D.rerolled || !quests.some(r => !r.done) ? 'disabled' : ''}>${ic('shuffle')} 重抽委託 (${D.rerolled ? 0 : 1})</button>`)}
+      <div class="qsec">${ic('star')} 今日主線<span class="muted">今天一定要完成</span></div>
+      ${mains.length ? mains.map(r => qrow(r, true)).join('') : '<div class="empty">今天沒有主線，是自由冒險日</div>'}
+      <div class="qsec">${ic('diamond-gem')} 今日委託<span class="muted">隨手解決的小事</span></div>
+      ${quests.length ? quests.map(r => qrow(r, false)).join('') : '<div class="empty">委託板空空的，到待辦清單丟幾件「未分類」小事進來吧</div>'}
+      ${all.length ? `<div class="qprog">今日進度 <div class="bar g"><i style="width:${doneN / all.length * 100}%"></i></div> ${doneN}/${all.length}</div>` : ''}
+      ${all.length && doneN === all.length ? `<div class="allclear">${ic('party-popper')} 今日任務全部完成！今天很棒！</div>` : ''}
+    </section>
+
+    <section class="card">
+      ${cardH('calendar-text', '#e2f6e5', '今日行程', 'cal')}
+      ${items.length ? `<ul class="sched">${items.map(x => `<li><span class="t">${x.t}</span><span class="dot" style="background:${x.color}"></span><span class="grow">${esc(x.title)} ${x.sub ? `<span class="muted small">@${esc(x.sub)}</span>` : ''}</span>${KIND[x.kind] ? `<span class="kind" title="${KIND[x.kind][1]}">${ic(KIND[x.kind][0])}</span>` : ''}</li>`).join('')}</ul>`
+      : '<div class="empty">今天沒有課也沒有行程</div>'}
+    </section>
+
+    <section class="card">
+      ${cardH('alarm-clock', '#ffe3e9', 'DDL 倒數', 'tasks')}
+      ${dueSoon.length ? dueSoon.map(r => `<div class="kv"><span>${esc(r.title)} ${r.course ? `<span class="muted small">· ${esc(r.course.name)}</span>` : ''}</span>${ddlChip(r.ddl)}</div>`).join('') : '<div class="empty">沒有待處理的截止日</div>'}
+    </section>
+
+    <section class="card">
+      ${cardH('compass', '#d6edfc', '計劃進度', 'tasks')}
+      ${['week', 'month', 'year'].map(k => { const [d, t] = plan(k); return `<div class="kv"><span>${HZSHORT[k]}</span><b>${d}/${t}</b></div><div class="bar ${k === 'year' ? 'y' : ''}"><i style="width:${t ? d / t * 100 : 0}%"></i></div>`; }).join('')}
+      <p class="small muted" style="margin:10px 0 0">這週還剩 ${daysLeftW} 天 · 這個月還剩 ${dim - +td.slice(8) + 1} 天</p>
+    </section>
+
+    <section class="card">
+      ${cardH('leaf', '#dff3e2', '今日習慣', 'habits')}
+      ${hab.length ? hab.map(x => { const k = habitKey(x, td); return `<div class="hab-mini ${x.log[k] ? 'done' : ''}"><button class="chk" data-act="habit" data-id="${x.id}" data-key="${k}">${ic('check')}</button><span class="hico">${ic(hIcon(x))}</span><span class="nm">${esc(x.name)}</span><span class="chip">${FREQ[x.freq]}</span><span class="streak">${ic('fire')}${habitStreak(x)}</span></div>`; }).join('') : '<div class="empty">今天沒有要打卡的習慣</div>'}
+    </section>
+
+    <section class="card span2">
+      ${cardH('brush', '#efe6fd', '才藝與工作 · 本週', '')}
+      <div class="two tight">
+        <div><div class="sub-h" data-go="hobby">${ic('brush')} 自我學習 ${ic('chevron-right')}</div>
+          ${hobbies.length ? hobbies.map(x => { const m = hobbyMins(x, wk0); const tg = x.target || 0; return `<div class="kv small"><span><span class="dot" style="background:${x.color}"></span> ${esc(x.name)}</span><b>${fmtMin(m)}${tg ? ` / ${fmtMin(tg)}` : ''}</b></div>${tg ? `<div class="bar thin"><i style="width:${Math.min(100, m / tg * 100)}%;background:${x.color}"></i></div>` : ''}`; }).join('') : '<div class="empty">還沒有自我學習項目</div>'}
+        </div>
+        <div><div class="sub-h" data-go="work">${ic('briefcase')} 工作 ${ic('chevron-right')}</div>
+          ${S.jobs.length ? S.jobs.map(j => { const s = jobStats(j, thisYM()); const today = scheduleOn(td, ['job']).find(x => x.obj === j); const nx = lastLog(j); return `<div class="kv small"><span><span class="dot" style="background:${j.color}"></span> ${esc(j.name)}</span><b>本月 ${fmtH(s.hours)} · ${money(s.earned)}</b></div>${today && nx?.next ? `<div class="hint">${ic('lightbulb')} 今天 ${today.start} 要上：${esc(nx.next)}</div>` : ''}`; }).join('') : '<div class="empty">還沒有工作紀錄</div>'}
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      ${cardH('camera', '#ffe3e9', '今日回顧', 'review')}
+      <div class="review-thumb" data-act="openReview" data-date="${td}" style="${PHOTOS[td] ? `background-image:url(${PHOTOS[td]})` : ''}">${PHOTOS[td] ? '' : `<span>${ic('plus')} 上傳今天的一張照片</span>`}</div>
+      <p class="small" style="margin:8px 0 0">${rv && rv.note ? esc(rv.note) : '<span class="muted">一張照片＋一句話，就是今天的紀錄。</span>'}</p>
+    </section>
+
+    <section class="card">
+      ${cardH('coins', '#fff1c2', '本月記帳', 'money')}
+      <div class="stat3"><div><small>支出</small><b>${money(mm.out)}</b></div><div><small>收入</small><b>${money(mm.inc)}</b></div><div><small>結餘</small><b>${money(mm.inc - mm.out)}</b></div></div>
+      ${S.settings.budget > 0 ? `<div class="kv small" style="margin-top:10px"><span>預算 ${money(S.settings.budget)}</span><span>剩 ${money(S.settings.budget - mm.out)}</span></div>
+      <div class="bar ${mm.out > S.settings.budget ? 'r' : mm.out > S.settings.budget * .8 ? 'y' : 'g'}"><i style="width:${Math.min(100, mm.out / S.settings.budget * 100)}%"></i></div>` : ''}
+    </section>
+
+    <section class="card span2">
+      ${cardH('sticky-note-text', '#e1f1fd', '快速筆記', 'notes')}
+      <div class="row"><input type="text" id="qnote" class="grow" placeholder="想到什麼先記下來…" data-enter="quickNote"><button class="btn sm" data-act="quickNote">記下</button></div>
+      ${pins.length ? `<ul class="pinlist">${pins.map(n => `<li style="background:${n.color}">${n.pinned ? ic('bookmark', 'pin') : ''}${esc(n.text)}</li>`).join('')}</ul>` : ''}
+    </section>
+  </div>`;
+};
+
+/* ---------- tasks ---------- */
+PAGES.tasks = () => {
+  const v = S.settings.taskView, hide = S.settings.hideDone;
+  const list = S.tasks.filter(t => !(hide && t.done)).sort((a, b) => (a.done - b.done) || cmpRank(refOf('t:' + a.id), refOf('t:' + b.id)));
+  const total = S.tasks.length, doneN = S.tasks.filter(t => t.done).length;
+  const zone = (field, key, title, icon, color, cls = '') => {
+    const items = list.filter(t => (t[field] || null) === (key === 'none' ? null : key));
+    return `<div class="zone ${cls}" data-zone="${field}:${key}" style="--zc:${color}"><h4>${tile(icon, color)}<span class="grow">${title}</span><span class="cnt">${items.filter(t => !t.done).length}</span></h4>
+      <div class="tasks">${items.map(t => taskItem(t, { showQuad: field === 'hz', showHz: field === 'quad' })).join('') || '<div class="empty">把卡片拖到這裡</div>'}</div></div>`;
+  };
+  const field = v === 'quad' ? 'quad' : 'hz';
+  return `
+  <div class="page-h"><h2>待辦清單</h2><span class="muted px small">已完成 ${doneN} / ${total}</span><span class="sp"></span></div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="addbar">
+      <input type="text" id="tTitle" placeholder="新增待辦，小事也可以（例如：洗衣服、換電池）" data-enter="addTask">
+      <input type="date" id="tDdl" title="DDL（可不填）">
+      <select id="tQuad"><option value="">四象限：未分類</option>${Object.entries(QUAD).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
+      <select id="tHz"><option value="">時間：未分類</option>${Object.entries(HZ).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
+      <button class="btn y" data-act="addTask">${ic('plus')} 新增</button>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="seg"><button class="${v === 'quad' ? 'on' : ''}" data-act="taskView" data-v="quad">四象限</button><button class="${v === 'hz' ? 'on' : ''}" data-act="taskView" data-v="hz">時間欄位</button></div>
+    <label class="tgl"><input type="checkbox" data-change="hideDone" ${hide ? 'checked' : ''}><span></span> 隱藏已完成</label>
+    <span class="muted small">${ic('lightbulb')} 拖曳卡片即可分類；手機上點「⋯」分類</span>
+  </div>
+  ${v === 'quad' ? `
+  <div class="quadwrap">
+    <span></span><div class="axis">${ic('zap')} 緊急</div><div class="axis">${ic('snail')} 不緊急</div>
+    <div class="axis v">重要</div>${zone('quad', 'q1', '緊急且重要', ...QICON.q1, 'q1')}${zone('quad', 'q2', '重要不緊急', ...QICON.q2)}
+    <div class="axis v">不重要</div>${zone('quad', 'q3', '緊急不重要', ...QICON.q3)}${zone('quad', 'q4', '不緊急不重要', ...QICON.q4)}
+  </div>` : `
+  <div class="cols4">${zone('hz', 'any', '隨時可完成', ...HICON.any)}${zone('hz', 'week', '一週內 · 週計劃', ...HICON.week)}${zone('hz', 'month', '一個月內 · 月計劃', ...HICON.month)}${zone('hz', 'year', '一年內 · 年目標', ...HICON.year)}</div>`}
+  ${zone(field, 'none', '未分類的小事 · 會被抽成「今日委託」', 'box', '#eceff3', 'none')}
+  `;
+};
+function taskModal(id) {
+  const t = S.tasks.find(x => x.id === id); if (!t) return;
+  openModal('編輯待辦', `
+    <label class="field"><span>事項</span><input type="text" id="eTitle" value="${esc(t.title)}"></label>
+    <label class="field"><span>DDL（可不填）</span><input type="date" id="eDdl" value="${t.ddl || ''}"></label>
+    <label class="field"><span>四象限</span><select id="eQuad"><option value="">未分類</option>${Object.entries(QUAD).map(([k, l]) => `<option value="${k}" ${t.quad === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label class="field"><span>時間欄位</span><select id="eHz"><option value="">未分類</option>${Object.entries(HZ).map(([k, l]) => `<option value="${k}" ${t.hz === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <div class="modal-actions"><button class="btn pk" data-act="delTask" data-id="${id}">刪除</button><span class="sp"></span><button class="btn w" data-act="closeModal">取消</button><button class="btn y" data-act="saveTask" data-id="${id}">儲存</button></div>`);
+}
+
+/* ---------- timetable (shared) ---------- */
+function timetable(list, act) {
+  const slots = list.flatMap(c => (c.slots || []).map(s => ({ c, s })));
+  if (!slots.length) return '';
+  const hasWeekend = slots.some(x => x.s.day >= 6);
+  const days = hasWeekend ? [1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4, 5];
+  let lo = 24 * 60, hi = 0;
+  slots.forEach(({ s }) => { lo = Math.min(lo, Math.floor(toMin(s.start) / 60) * 60); hi = Math.max(hi, Math.ceil(toMin(s.end) / 60) * 60); });
+  lo = Math.min(lo, hi - 4 * 60);
+  const PX = 0.9, OFF = 10, H = (hi - lo) * PX + OFF * 2, todayD = wdOf(TODAY()) || 7;
+  let lines = '', times = '';
+  for (let m = lo; m <= hi; m += 60) { lines += `<div class="tt-line" style="top:${(m - lo) * PX + OFF}px"></div>`; times += `<span style="top:${(m - lo) * PX + OFF}px">${pad(m / 60)}:00</span>`; }
+  return `<div class="tt-grid" style="grid-template-columns:48px repeat(${days.length},minmax(90px,1fr))">
+    <div class="tt-head"></div>${days.map(d => `<div class="tt-head ${d === todayD ? 'today' : ''}">週${WD[d % 7]}</div>`).join('')}
+    <div class="tt-time" style="height:${H}px">${times}</div>
+    ${days.map(d => `<div class="tt-col ${d === todayD ? 'today' : ''}" style="height:${H}px">${lines}${slots.filter(x => x.s.day === d).map(({ c, s }) =>
+      `<div class="tt-blk" data-act="${act}" data-id="${c.id}" style="top:${(toMin(s.start) - lo) * PX + OFF}px;height:${(toMin(s.end) - toMin(s.start)) * PX}px;--c:${c.color}"><b>${esc(c.name)}</b>${s.start}–${s.end}${c.room || c.place ? `<br>${esc(c.room || c.place)}` : ''}</div>`).join('')}</div>`).join('')}
+  </div>`;
+}
+const chipList = (list, sel, act, count) => `<div class="course-list">${list.map(x => `<button class="cchip ${x.id === sel ? 'on' : ''}" data-act="${act}" data-id="${x.id}"><i style="background:${x.color}"></i>${esc(x.name)}${count ? ` <span class="cnt">${count(x)}</span>` : ''}</button>`).join('')}</div>`;
+
+/* ---------- courses ---------- */
+PAGES.courses = () => {
+  const wk = semWeek();
+  if (!UI.course || !S.courses.find(c => c.id === UI.course)) UI.course = S.courses[0]?.id || null;
+  const c = S.courses.find(x => x.id === UI.course);
+  return `
+  <div class="page-h"><h2>課程管理</h2><span class="chip y">${wk >= 1 && wk <= 18 ? `學期第 ${wk} 週` : wk < 1 ? '學期還沒開始' : '學期已結束'}</span><span class="sp"></span>
+    <button class="btn y" data-act="courseModal">${ic('plus')} 新增課程</button></div>
+  ${S.courses.length ? timetable(S.courses, 'pickCourse') : `<div class="card empty">還沒有課程，按右上角「新增課程」輸入這學期的課吧！</div>`}
+  ${chipList(S.courses, UI.course, 'pickCourse', x => x.hw.filter(h => !h.done).length)}
+  ${c ? courseDetail(c, wk) : ''}`;
+};
+function courseDetail(c, wk) {
+  const hw = [...c.hw].sort((a, b) => (a.done - b.done) || (a.ddl || '9').localeCompare(b.ddl || '9'));
+  let weeks = '';
+  for (let i = 1; i <= 18; i++) {
+    const w = c.weeks[i] || {}; const st = addDays(S.settings.semStart, (i - 1) * 7);
+    weeks += `<div class="wk-row ${i === wk ? 'now' : ''} ${w.done ? 'done' : ''}" ${i === wk ? 'id="nowWeek"' : ''}>
+      <button class="chk" data-act="weekDone" data-c="${c.id}" data-w="${i}">${ic('check')}</button>
+      <span class="wl">W${i}<br><span class="muted">${md(st)}–${md(addDays(st, 6))}</span></span>
+      <input type="text" value="${esc(w.text || '')}" placeholder="這週要讀到哪？" data-change="weekText" data-c="${c.id}" data-w="${i}"></div>`;
+  }
+  return `<div class="card detail" style="--c:${c.color}">
+    <div class="card-h"><h3>${esc(c.name)}</h3><button class="btn sm w" data-act="courseModal" data-id="${c.id}">${ic('pencil')} 編輯</button></div>
+    <p class="meta-line">${c.teacher ? ic('user') + esc(c.teacher) : ''}${c.room ? ic('map-pin') + esc(c.room) : ''}${c.slots.length ? ic('clock') + c.slots.map(s => `週${WD[s.day % 7]} ${s.start}–${s.end}`).join('、') : ''}</p>
+    <div class="two">
+      <div><h4 class="sub-h">${ic('scroll-vertical')} 作業 / 考試</h4>
+        <div class="row" style="margin-bottom:10px"><input type="text" id="hwTitle" class="grow" placeholder="作業名稱" data-enter="addHw" data-c="${c.id}"><input type="date" id="hwDdl"><button class="btn sm y" data-act="addHw" data-c="${c.id}">${ic('plus')}</button></div>
+        ${hw.map(h => `<div class="task ${h.done ? 'done' : ''}"><button class="chk" data-act="toggle" data-ref="h:${c.id}:${h.id}">${ic('check')}</button><div class="tt"><div class="name">${esc(h.title)}</div><div class="meta">${ddlChip(h.ddl, h.done)}</div></div>${h.done ? '<span class="stamp">CLEAR!</span>' : ''}<button class="iconbtn" data-act="delHw" data-c="${c.id}" data-id="${h.id}" aria-label="刪除">${ic('close')}</button></div>`).join('') || '<div class="empty">目前沒有作業</div>'}
+      </div>
+      <div><h4 class="sub-h">${ic('book-open')} 每週進度</h4><div class="weeks" id="weeksBox">${weeks}</div></div>
+    </div></div>`;
+}
+function courseModal(id) {
+  const c = id ? S.courses.find(x => x.id === id) : { name: '', teacher: '', room: '', color: COLORS[S.courses.length % COLORS.length], slots: [{ day: 1, start: '09:10', end: '11:00' }] };
+  openModal(id ? '編輯課程' : '新增課程', `
+    <label class="field"><span>課程名稱</span><input type="text" id="cName" value="${esc(c.name)}" placeholder="例如：生成式 AI 導論"></label>
+    <div class="row"><label class="field grow"><span>老師</span><input type="text" id="cTeacher" value="${esc(c.teacher)}"></label><label class="field grow"><span>教室</span><input type="text" id="cRoom" value="${esc(c.room)}"></label></div>
+    <div class="field"><span>顏色</span>${swatches('cColor', c.color)}</div>
+    <div class="field"><span>上課時間</span>${slotEditor(c.slots)}</div>
+    <div class="modal-actions">${id ? `<button class="btn pk" data-act="delCourse" data-id="${id}">刪除課程</button>` : ''}<span class="sp"></span><button class="btn w" data-act="closeModal">取消</button><button class="btn y" data-act="saveCourse" data-id="${id || ''}">儲存</button></div>`);
+}
+
+/* ---------- hobbies (自我學習 / 才藝) ---------- */
+const hobbyMins = (x, monday) => x.logs.filter(l => l.date >= monday && l.date <= addDays(monday, 6)).reduce((s, l) => s + (+l.mins || 0), 0);
+PAGES.hobby = () => {
+  if (!UI.hobby || !S.hobbies.find(c => c.id === UI.hobby)) UI.hobby = S.hobbies[0]?.id || null;
+  const x = S.hobbies.find(c => c.id === UI.hobby);
+  return `
+  <div class="page-h"><h2>自我學習</h2><span class="muted small">才藝課、球隊練習、自學…和學校課業分開記錄</span><span class="sp"></span>
+    <button class="btn y" data-act="hobbyModal">${ic('plus')} 新增項目</button></div>
+  ${S.hobbies.length ? timetable(S.hobbies, 'pickHobby') : `<div class="card empty">還沒有項目。畫畫課、吉他課、系隊練習、線上口說課都可以加進來！</div>`}
+  ${chipList(S.hobbies, UI.hobby, 'pickHobby')}
+  ${x ? hobbyDetail(x) : ''}`;
+};
+function hobbyDetail(x) {
+  const wk0 = mondayOf(TODAY()), m = hobbyMins(x, wk0), tg = x.target || 0;
+  const total = x.logs.reduce((s, l) => s + (+l.mins || 0), 0);
+  const logs = [...x.logs].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  const goals = [...x.goals].sort((a, b) => a.done - b.done);
+  return `<div class="card detail" style="--c:${x.color}">
+    <div class="card-h"><h3>${esc(x.name)} <span class="chip">${HOBBY_KINDS[x.kind] || '上課'}</span></h3><button class="btn sm w" data-act="hobbyModal" data-id="${x.id}">${ic('pencil')} 編輯</button></div>
+    <p class="meta-line">${x.teacher ? ic('user') + esc(x.teacher) : ''}${x.place ? ic('map-pin') + esc(x.place) : ''}${x.slots.length ? ic('clock') + x.slots.map(s => `週${WD[s.day % 7]} ${s.start}–${s.end}`).join('、') : ''}</p>
+    <div class="stat3" style="margin-bottom:6px"><div><small>本週</small><b>${fmtMin(m)}</b></div><div><small>累計次數</small><b>${x.logs.length} 次</b></div><div><small>累計時間</small><b>${fmtMin(total)}</b></div></div>
+    ${tg ? `<div class="kv small"><span>本週目標 ${fmtMin(tg)}</span><span>${m >= tg ? '達成！' : `還差 ${fmtMin(tg - m)}`}</span></div><div class="bar ${m >= tg ? 'g' : ''}" style="margin-bottom:14px"><i style="width:${Math.min(100, m / tg * 100)}%"></i></div>` : ''}
+    <div class="two">
+      <div><h4 class="sub-h">${ic('notebook')} 紀錄一次</h4>
+        <div class="row" style="margin-bottom:6px"><input type="date" id="hlDate" value="${TODAY()}"><input type="number" id="hlMins" min="0" step="5" placeholder="分鐘" value="${x.slots[0] ? Math.round(hrs(x.slots[0].start, x.slots[0].end) * 60) : 30}" style="width:90px"></div>
+        <div class="row" style="margin-bottom:10px"><input type="text" id="hlText" class="grow" placeholder="今天學了 / 練了什麼？" data-enter="addHobbyLog" data-id="${x.id}"><button class="btn sm y" data-act="addHobbyLog" data-id="${x.id}">${ic('plus')} 記錄</button></div>
+        ${logs.slice(0, 30).map(l => `<div class="logrow"><span class="ld">${mdw(l.date)}</span><span class="chip">${fmtMin(+l.mins || 0)}</span><span class="grow">${esc(l.text) || '<span class="muted">（沒寫內容）</span>'}</span><button class="iconbtn" data-act="delHobbyLog" data-id="${x.id}" data-log="${l.id}" aria-label="刪除">${ic('close')}</button></div>`).join('') || '<div class="empty">還沒有紀錄</div>'}
+      </div>
+      <div><h4 class="sub-h">${ic('target')} 目標清單</h4>
+        <div class="row" style="margin-bottom:10px"><input type="text" id="hgText" class="grow" placeholder="例如：學會 F 和弦" data-enter="addGoal" data-id="${x.id}"><button class="btn sm y" data-act="addGoal" data-id="${x.id}">${ic('plus')}</button></div>
+        ${goals.map(g => `<div class="task ${g.done ? 'done' : ''}"><button class="chk" data-act="goalDone" data-id="${x.id}" data-goal="${g.id}">${ic('check')}</button><div class="tt"><div class="name">${esc(g.text)}</div>${g.done ? `<div class="meta"><span class="chip ok">${md(g.doneAt)} 達成</span></div>` : ''}</div>${g.done ? '<span class="stamp">CLEAR!</span>' : ''}<button class="iconbtn" data-act="delGoal" data-id="${x.id}" data-goal="${g.id}" aria-label="刪除">${ic('close')}</button></div>`).join('') || '<div class="empty">設定一個小目標吧</div>'}
+      </div>
+    </div></div>`;
+}
+function hobbyModal(id) {
+  const x = id ? S.hobbies.find(c => c.id === id) : { name: '', kind: 'class', teacher: '', place: '', color: COLORS[(S.hobbies.length + 4) % COLORS.length], slots: [], target: 0 };
+  openModal(id ? '編輯項目' : '新增自我學習項目', `
+    <label class="field"><span>名稱</span><input type="text" id="hoName" value="${esc(x.name)}" placeholder="例如：吉他課、排球系隊練習"></label>
+    <div class="field"><span>類型</span><div class="seg" id="hoKind">${Object.entries(HOBBY_KINDS).map(([k, l]) => `<button class="${x.kind === k ? 'on' : ''}" data-act="pickSeg" data-v="${k}">${l}</button>`).join('')}</div></div>
+    <div class="row"><label class="field grow"><span>老師 / 教練</span><input type="text" id="hoTeacher" value="${esc(x.teacher)}"></label><label class="field grow"><span>地點</span><input type="text" id="hoPlace" value="${esc(x.place)}"></label></div>
+    <label class="field"><span>每週目標時間（分鐘，可不填）</span><input type="number" id="hoTarget" min="0" step="10" value="${x.target || ''}" placeholder="例如：120"></label>
+    <div class="field"><span>顏色</span>${swatches('hoColor', x.color)}</div>
+    <div class="field"><span>固定時間（沒有固定時間可以不加）</span>${slotEditor(x.slots)}</div>
+    <div class="modal-actions">${id ? `<button class="btn pk" data-act="delHobby" data-id="${id}">刪除</button>` : ''}<span class="sp"></span><button class="btn w" data-act="closeModal">取消</button><button class="btn y" data-act="saveHobby" data-id="${id || ''}">儲存</button></div>`);
+}
+
+/* ---------- jobs (工作 / 家教) ---------- */
+const lastLog = j => [...j.logs].sort((a, b) => b.date.localeCompare(a.date))[0];
+function jobStats(j, ym) {
+  const l = j.logs.filter(x => x.date.startsWith(ym));
+  const hours = l.reduce((s, x) => s + hrs(x.start, x.end), 0);
+  const earned = Math.round(hours * (+j.rate || 0));
+  const unpaid = Math.round(j.logs.filter(x => !x.paid).reduce((s, x) => s + hrs(x.start, x.end), 0) * (+j.rate || 0));
+  return { n: l.length, hours, earned, unpaid };
+}
+PAGES.work = () => {
+  if (!UI.job || !S.jobs.find(c => c.id === UI.job)) UI.job = S.jobs[0]?.id || null;
+  const j = S.jobs.find(c => c.id === UI.job);
+  return `
+  <div class="page-h"><h2>工作</h2><span class="muted small">家教、打工的時間、進度和收入</span><span class="sp"></span>
+    <button class="btn y" data-act="jobModal">${ic('plus')} 新增工作</button></div>
+  ${S.jobs.length ? chipList(S.jobs, UI.job, 'pickJob') : `<div class="card empty">還沒有工作。家教、打工都可以加進來，記錄每次上課的進度和時數。</div>`}
+  ${j ? jobDetail(j) : ''}`;
+};
+function jobDetail(j) {
+  const ym = thisYM(), s = jobStats(j, ym), nx = lastLog(j);
+  const td = TODAY(), slot = j.slots.find(x => x.day % 7 === wdOf(td)) || j.slots[0] || { start: '19:00', end: '21:00' };
+  const logs = [...j.logs].sort((a, b) => b.date.localeCompare(a.date));
+  return `<div class="card detail" style="--c:${j.color}">
+    <div class="card-h"><h3>${esc(j.name)}</h3><button class="btn sm w" data-act="jobModal" data-id="${j.id}">${ic('pencil')} 編輯</button></div>
+    <p class="meta-line">${j.student ? ic('user') + esc(j.student) : ''}${j.place ? ic('map-pin') + esc(j.place) : ''}${j.rate ? ic('dollar') + `時薪 ${money(j.rate)}` : ''}${j.slots.length ? ic('clock') + j.slots.map(x => `週${WD[x.day % 7]} ${x.start}–${x.end}`).join('、') : ''}</p>
+    <div class="stat4"><div><small>本月上課</small><b>${s.n} 次</b></div><div><small>本月時數</small><b>${fmtH(s.hours)}</b></div><div><small>本月收入</small><b>${money(s.earned)}</b></div><div class="${s.unpaid ? 'warn' : ''}"><small>還沒入帳</small><b>${money(s.unpaid)}</b></div></div>
+    ${nx && (nx.next || nx.hw) ? `<div class="nextbox">${tile('lightbulb', '#fff1c2')}<div><b class="px">下次上課</b>${nx.next ? `<div>預計進度：${esc(nx.next)}</div>` : ''}${nx.hw ? `<div class="muted small">上次出的作業：${esc(nx.hw)}</div>` : ''}</div></div>` : ''}
+    <div class="two">
+      <div><h4 class="sub-h">${ic('notebook')} 新增上課紀錄</h4>
+        <div class="row" style="margin-bottom:6px"><input type="date" id="jlDate" value="${td}"><input type="time" id="jlStart" value="${slot.start}"><span class="muted">–</span><input type="time" id="jlEnd" value="${slot.end}"></div>
+        <label class="field"><span>這次教了什麼</span><input type="text" id="jlContent" placeholder="例如：一元二次方程式配方法"></label>
+        <label class="field"><span>出的作業</span><input type="text" id="jlHw" placeholder="例如：講義 p.12–15"></label>
+        <label class="field"><span>下次計劃</span><input type="text" id="jlNext" placeholder="例如：公式解、檢討作業"></label>
+        <button class="btn y" data-act="addJobLog" data-id="${j.id}">${ic('plus')} 記錄這次上課</button>
+      </div>
+      <div><h4 class="sub-h">${ic('list-box')} 上課紀錄</h4>
+        ${logs.slice(0, 40).map(l => `<div class="jlog ${l.paid ? 'paid' : ''}">
+          <div class="jl-h"><b class="px">${mdw(l.date)}</b><span class="muted small">${l.start}–${l.end} · ${fmtH(hrs(l.start, l.end))}</span><span class="sp" style="flex:1"></span>
+            <button class="pay ${l.paid ? 'on' : ''}" data-act="togglePaid" data-id="${j.id}" data-log="${l.id}">${l.paid ? ic('check') + ' 已入帳' : '未入帳'}</button>
+            <button class="iconbtn" data-act="delJobLog" data-id="${j.id}" data-log="${l.id}" aria-label="刪除">${ic('close')}</button></div>
+          ${l.content ? `<div>${esc(l.content)}</div>` : ''}${l.hw ? `<div class="small muted">作業：${esc(l.hw)}</div>` : ''}${l.next ? `<div class="small muted">下次：${esc(l.next)}</div>` : ''}</div>`).join('') || '<div class="empty">還沒有上課紀錄</div>'}
+        <p class="small muted">${ic('lightbulb')} 按「未入帳」標成已入帳時，會自動在記帳加一筆打工收入。</p>
+      </div>
+    </div></div>`;
+}
+function jobModal(id) {
+  const j = id ? S.jobs.find(c => c.id === id) : { name: '', student: '', place: '', rate: '', color: COLORS[(S.jobs.length + 5) % COLORS.length], slots: [{ day: 1, start: '19:00', end: '21:00' }] };
+  openModal(id ? '編輯工作' : '新增工作', `
+    <label class="field"><span>工作名稱</span><input type="text" id="jName" value="${esc(j.name)}" placeholder="例如：家教・國三數學"></label>
+    <div class="row"><label class="field grow"><span>學生 / 單位</span><input type="text" id="jStudent" value="${esc(j.student)}"></label><label class="field grow"><span>地點</span><input type="text" id="jPlace" value="${esc(j.place)}"></label></div>
+    <label class="field"><span>時薪（元）</span><input type="number" id="jRate" min="0" value="${j.rate}"></label>
+    <div class="field"><span>顏色</span>${swatches('jColor', j.color)}</div>
+    <div class="field"><span>固定時間</span>${slotEditor(j.slots)}</div>
+    <div class="modal-actions">${id ? `<button class="btn pk" data-act="delJob" data-id="${id}">刪除</button>` : ''}<span class="sp"></span><button class="btn w" data-act="closeModal">取消</button><button class="btn y" data-act="saveJob" data-id="${id || ''}">儲存</button></div>`);
+}
+
+/* ---------- calendar ---------- */
+PAGES.cal = () => {
+  const v = S.settings.calView;
+  const ttl = v === 'month' ? ymLabel(UI.calYM) : `${md(UI.calWeek)} – ${md(addDays(UI.calWeek, 6))}`;
+  return `
+  <div class="page-h"><h2>行事曆</h2><span class="sp"></span>
+    <div class="seg"><button class="${v === 'month' ? 'on' : ''}" data-act="calView" data-v="month">月</button><button class="${v === 'week' ? 'on' : ''}" data-act="calView" data-v="week">週</button></div></div>
+  <div class="toolbar"><div class="navrow"><button class="btn sm w" data-act="calNav" data-n="-1" aria-label="上一頁">${ic('chevron-left')}</button><span class="ttl">${ttl}</span><button class="btn sm w" data-act="calNav" data-n="1" aria-label="下一頁">${ic('chevron-right')}</button><button class="btn sm" data-act="calToday">今天</button></div><span class="sp" style="flex:1"></span>
+    <button class="btn y" data-act="dayModal" data-date="${TODAY()}">${ic('plus')} 新增行程</button></div>
+  ${v === 'month' ? calMonth() : calWeek()}
+  <p class="small muted">${ic('lightbulb')} 點日期可以新增行程、看當天的課表、DDL 和每日回顧；有回顧照片的日子會把照片貼在格子上。</p>`;
+};
+function calMonth() {
+  const td = TODAY();
+  return `<div class="cal">${['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="wd">${w}</div>`).join('')}
+  ${monthCells(UI.calYM).map(({ date, in: inM }) => {
+    const items = [...eventsOn(date).map(e => `<div class="ev" style="--c:${e.color}">${e.time ? e.time + ' ' : ''}${esc(e.title)}</div>`),
+      ...ddlsOn(date).map(r => `<div class="ev ddl">${r.done ? '✓ ' : ''}${esc(r.title)}</div>`)];
+    const ph = PHOTOS[date];
+    return `<div class="cell ${inM ? '' : 'out'} ${date === td ? 'today' : ''} ${ph ? 'photo' : ''}" data-act="dayModal" data-date="${date}" ${ph ? `style="background-image:url(${ph})"` : ''}>
+      <span class="n">${+date.slice(8)}</span>${items.slice(0, 3).join('')}${items.length > 3 ? `<div class="ev more">+${items.length - 3}</div>` : ''}</div>`;
+  }).join('')}</div>`;
+}
+function calWeek() {
+  const td = TODAY();
+  return `<div class="week7">${[0, 1, 2, 3, 4, 5, 6].map(i => {
+    const d = addDays(UI.calWeek, i);
+    const its = [
+      ...scheduleOn(d).map(x => ({ k: x.start, h: `<div class="it" style="--c:${x.color}"><small>${x.start}–${x.end} · ${KIND[x.kind][1]}</small>${esc(x.title)}</div>` })),
+      ...eventsOn(d).map(e => ({ k: e.time || '00:00', h: `<div class="it ev2" style="--c:${e.color}"><small>${e.time || '全天'}</small>${esc(e.title)}</div>` })),
+      ...ddlsOn(d).map(r => ({ k: '99', h: `<div class="it ddl"><small>${r.done ? '✓ 完成' : 'DDL'}</small>${esc(r.title)}</div>` }))
+    ].sort((a, b) => a.k.localeCompare(b.k));
+    return `<div class="day ${d === td ? 'today' : ''}" data-act="dayModal" data-date="${d}"><div class="dh">${mdw(d)}</div>
+      ${PHOTOS[d] ? `<div class="dp" style="background-image:url(${PHOTOS[d]})"></div>` : ''}${its.map(x => x.h).join('') || '<div class="empty">—</div>'}</div>`;
+  }).join('')}</div>`;
+}
+function dayModal(date) {
+  const sch = scheduleOn(date), evs = eventsOn(date), dd = ddlsOn(date), rv = S.reviews[date];
+  openModal(`${date.slice(0, 4)} 年 ${mdw(date)}`, `
+    ${sch.length ? `<h4 class="sub-h">${ic('clock')} 課程・才藝・工作</h4><ul class="sched">${sch.map(x => `<li><span class="t">${x.start}–${x.end}</span><span class="dot" style="background:${x.color}"></span><span class="grow">${esc(x.title)}</span><span class="kind">${ic(KIND[x.kind][0])}</span></li>`).join('')}</ul><div class="hr"></div>` : ''}
+    <h4 class="sub-h">${ic('calendar-text')} 行程</h4>
+    ${evs.map(e => `<div class="task"><span class="dot" style="background:${e.color}"></span><div class="tt"><b class="px small">${e.time || '全天'}</b> ${esc(e.title)}</div><button class="iconbtn" data-act="delEvent" data-id="${e.id}" data-date="${date}" aria-label="刪除">${ic('close')}</button></div>`).join('') || '<div class="empty">這天還沒有行程</div>'}
+    <div class="row" style="margin-top:6px"><input type="time" id="evTime"><input type="text" id="evTitle" class="grow" placeholder="新增行程" data-enter="addEvent" data-date="${date}"></div>
+    <div class="row" style="margin-top:8px">${swatches('evColor', COLORS[0], 6)}<span style="flex:1"></span><button class="btn sm y" data-act="addEvent" data-date="${date}">${ic('plus')} 加入</button></div>
+    ${dd.length ? `<div class="hr"></div><h4 class="sub-h">${ic('alarm-clock')} 這天到期</h4>${dd.map(r => `<div class="task ${r.done ? 'done' : ''}"><button class="chk" data-act="toggle" data-ref="${r.ref}" data-keep="day" data-date="${date}">${ic('check')}</button><div class="tt">${esc(r.title)} ${r.course ? `<span class="chip">${esc(r.course.name)}</span>` : ''}</div></div>`).join('')}` : ''}
+    <div class="hr"></div><h4 class="sub-h">${ic('camera')} 每日回顧</h4>
+    ${PHOTOS[date] || rv?.note ? `<div class="row">${PHOTOS[date] ? `<img src="${PHOTOS[date]}" alt="" style="width:110px;height:82px;object-fit:cover">` : ''}<p class="small grow" style="margin:0">${esc(rv?.note || '')}</p></div>` : '<div class="empty">還沒有這天的回顧</div>'}
+    <div class="modal-actions"><button class="btn w" data-act="openReview" data-date="${date}">${PHOTOS[date] || rv?.note ? '編輯回顧' : ic('plus') + ' 寫回顧'}</button></div>`);
+}
+
+/* ---------- habits ---------- */
+function habitKey(h, date) {
+  if (h.freq === 'weekly') return mondayOf(date);
+  if (h.freq === 'monthly') return date.slice(0, 7);
+  return date;
+}
+const isTarget = (h, date) => h.freq !== 'custom' || h.days.includes(wdOf(date));
+function habitDueToday(h) { return isTarget(h, TODAY()); }
+function habitStreak(h) {
+  const td = h.archived && h.archivedAt ? h.archivedAt : TODAY(); let n = 0, g = 0;
+  if (h.freq === 'weekly' || h.freq === 'monthly') {
+    const step = k => h.freq === 'weekly' ? addDays(k, -7) : ymShift(k, -1);
+    let k = habitKey(h, td); if (!h.log[k]) k = step(k);
+    while (h.log[k] && g++ < 600) { n++; k = step(k); }
+    return n;
+  }
+  let d = td; if (!h.log[d]) d = addDays(d, -1);
+  while (g++ < 1500) {
+    if (!isTarget(h, d)) { d = addDays(d, -1); continue; }
+    if (h.log[d]) { n++; d = addDays(d, -1); } else break;
+  }
+  return n;
+}
+const habitTotal = h => Object.keys(h.log).filter(k => h.log[k]).length;
+function habitGrid(h) {
+  const td = TODAY(), tk = habitKey(h, td), ro = h.archived;
+  if (h.freq === 'weekly') {
+    const ws = []; for (let i = 11; i >= 0; i--) ws.push(addDays(tk, -7 * i));
+    return `<div class="small muted px" style="margin-bottom:4px">最近 12 週</div><div class="hgrid w12">${ws.map(w => `<button class="hc ${h.log[w] ? 'on' : ''} ${w === tk ? 'today' : ''}" ${ro ? '' : `data-act="habit" data-id="${h.id}" data-key="${w}"`} title="${w} 那週">${md(w)}</button>`).join('')}</div>`;
+  }
+  if (h.freq === 'monthly') {
+    const y = td.slice(0, 4);
+    return `<div class="small muted px" style="margin-bottom:4px">${y} 年</div><div class="hgrid m12">${Array.from({ length: 12 }, (_, i) => `${y}-${pad(i + 1)}`).map(m => `<button class="hc ${h.log[m] ? 'on' : ''} ${m === tk ? 'today' : ''} ${m > tk ? 'fut' : ''}" ${ro || m > tk ? '' : `data-act="habit" data-id="${h.id}" data-key="${m}"`}>${+m.slice(5)}月</button>`).join('')}</div>`;
+  }
+  const ym = UI.hMonth[h.id] || (h.archived && h.archivedAt ? h.archivedAt.slice(0, 7) : thisYM());
+  return `<div class="row" style="justify-content:space-between;margin-bottom:4px"><button class="iconbtn" data-act="hMonth" data-id="${h.id}" data-n="-1" aria-label="上個月">${ic('chevron-left')}</button><span class="px small">${ymLabel(ym)}</span><button class="iconbtn" data-act="hMonth" data-id="${h.id}" data-n="1" aria-label="下個月">${ic('chevron-right')}</button></div>
+  <div class="hgrid">${['一', '二', '三', '四', '五', '六', '日'].map(w => `<span class="wdh">${w}</span>`).join('')}
+  ${monthCells(ym).map(({ date, in: inM }) => {
+    if (!inM) return '<span class="hc blank"></span>';
+    const fut = date > td, off = !isTarget(h, date);
+    const act = !ro && !fut && !off ? `data-act="habit" data-id="${h.id}" data-key="${date}"` : '';
+    return `<button class="hc ${h.log[date] ? 'on' : ''} ${date === td ? 'today' : ''} ${fut ? 'fut' : ''} ${off ? 'off' : ''}" ${act}>${+date.slice(8)}</button>`;
+  }).join('')}</div>`;
+}
+function habitCard(h) {
+  const k = habitKey(h, TODAY()), due = habitDueToday(h);
+  const freqTxt = h.freq === 'custom' ? '每週' + h.days.slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(d => WD[d]).join('、') : FREQ[h.freq];
+  return `<div class="card hcard ${h.archived ? 'arch' : ''}">
+    <div class="hh"><div class="hi">${ic(hIcon(h))}</div><div class="hn"><b>${esc(h.name)}</b><span class="chip">${freqTxt}</span> ${h.archived ? `<span class="chip y">${ic('trophy')} ${h.archivedAt ? md(h.archivedAt) : ''} 結業</span>` : ''}</div>
+      ${!h.archived && due ? `<button class="btn sm ${h.log[k] ? 'on' : ''}" data-act="habit" data-id="${h.id}" data-key="${k}">${h.log[k] ? ic('check') + ' 已打卡' : '打卡'}</button>` : ''}</div>
+    <div class="hstats"><div><b>${ic('fire')}${habitStreak(h)}</b><small>連續</small></div><div><b>${habitTotal(h)}</b><small>累計次數</small></div><div><b>${md(h.createdAt)}</b><small>開始於</small></div></div>
+    ${habitGrid(h)}
+    <div class="row" style="justify-content:flex-end;margin-top:10px">
+      ${h.archived ? `<button class="btn sm w" data-act="unarchive" data-id="${h.id}">重新開始</button>` : `<button class="btn sm w" data-act="archive" data-id="${h.id}">${ic('trophy')} 結業</button>`}
+      <button class="iconbtn small" data-act="delHabit" data-id="${h.id}">${ic('trash')}</button></div></div>`;
+}
+PAGES.habits = () => {
+  const act = S.habits.filter(h => !h.archived), arc = S.habits.filter(h => h.archived);
+  return `<div class="page-h"><h2>習慣打卡</h2><span class="sp"></span><button class="btn y" data-act="habitModal">${ic('plus')} 新增習慣</button></div>
+  ${act.length ? `<div class="habits">${act.map(habitCard).join('')}</div>` : '<div class="card empty">還沒有習慣卡片，按「新增習慣」開始吧！</div>'}
+  <div class="page-h" style="margin-top:34px"><h2>堅持的足跡</h2><span class="muted small">結業的習慣會留在這裡，紀錄都不會消失。</span></div>
+  ${arc.length ? `<div class="habits">${arc.map(habitCard).join('')}</div>` : '<div class="empty">還沒有結業的習慣</div>'}`;
+};
+function habitModal() {
+  openModal('新增習慣', `
+    <label class="field"><span>習慣名稱</span><input type="text" id="hName" placeholder="例如：喝 8 杯水、背 20 個單字"></label>
+    <div class="field"><span>圖示</span><div class="icons" id="hIcon">${H_ICONS.map((x, i) => `<button class="${i === 0 ? 'on' : ''}" data-act="pickIcon" data-v="${x}">${ic(x)}</button>`).join('')}</div></div>
+    <div class="field"><span>打卡頻率</span><div class="seg" id="hFreq">${Object.entries(FREQ).map(([k, l], i) => `<button class="${i === 0 ? 'on' : ''}" data-act="pickFreq" data-v="${k}">${l}</button>`).join('')}</div></div>
+    <div class="field hidden" id="hDaysBox"><span>哪幾天要做？</span><div class="days7">${[1, 2, 3, 4, 5, 6, 0].map(d => `<label><input type="checkbox" value="${d}" ${d >= 1 && d <= 5 && d % 2 ? 'checked' : ''}>${WD[d]}</label>`).join('')}</div></div>
+    <p class="small muted" id="hFreqHint">每日：卡片上會出現當月的日期格子。</p>
+    <div class="modal-actions"><button class="btn w" data-act="closeModal">取消</button><button class="btn y" data-act="saveHabit">建立習慣卡</button></div>`);
+}
+
+/* ---------- money ---------- */
+function monthMoney(ym) {
+  const l = S.money.filter(m => m.date.startsWith(ym));
+  const out = l.filter(m => m.type === 'out').reduce((s, m) => s + m.amount, 0);
+  const inc = l.filter(m => m.type === 'in').reduce((s, m) => s + m.amount, 0);
+  return { l, out, inc };
+}
+const catIcon = (m) => (m.type === 'out' ? OUT_CATS : IN_CATS)[m.cat] || 'box';
+PAGES.money = () => {
+  const ym = UI.monYM, { l, out, inc } = monthMoney(ym), B = S.settings.budget;
+  const cats = {}; l.filter(m => m.type === 'out').forEach(m => cats[m.cat] = (cats[m.cat] || 0) + m.amount);
+  const catArr = Object.entries(cats).sort((a, b) => b[1] - a[1]); const max = catArr[0]?.[1] || 1;
+  const byDay = {}; l.forEach(m => (byDay[m.date] = byDay[m.date] || []).push(m));
+  const days = Object.keys(byDay).sort().reverse();
+  const type = UI.mType || 'out', catList = type === 'out' ? OUT_CATS : IN_CATS;
+  if (!UI.mCat || !catList[UI.mCat]) UI.mCat = Object.keys(catList)[0];
+  return `<div class="page-h"><h2>記帳</h2><span class="sp"></span><div class="navrow"><button class="btn sm w" data-act="monNav" data-n="-1" aria-label="上個月">${ic('chevron-left')}</button><span class="ttl">${ymLabel(ym)}</span><button class="btn sm w" data-act="monNav" data-n="1" aria-label="下個月">${ic('chevron-right')}</button></div></div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="addbar">
+      <div class="seg"><button class="${type === 'out' ? 'on' : ''}" data-act="mType" data-v="out">支出</button><button class="${type === 'in' ? 'on' : ''}" data-act="mType" data-v="in">收入</button></div>
+      <input type="date" id="mDate" value="${TODAY()}">
+      <input type="number" id="mAmt" placeholder="金額" min="0" style="width:110px" data-enter="addMoney">
+      <input type="text" id="mNote" placeholder="備註（例如：午餐便當）" data-enter="addMoney">
+      <button class="btn y" data-act="addMoney">${ic('plus')} 記一筆</button></div>
+    <div class="catpick">${Object.entries(catList).map(([k, i]) => `<button class="${UI.mCat === k ? 'on' : ''}" data-act="pickCat" data-v="${k}"><span class="tile" style="background:${CAT_COLORS[k]}">${ic(i)}</span>${k}</button>`).join('')}</div>
+  </div>
+  <div class="dash" style="grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)">
+    <div class="card">
+      ${cardH('chart-bar-big', '#fff1c2', '本月整理', '')}
+      <div class="stat3"><div><small>支出</small><b>${money(out)}</b></div><div><small>收入</small><b>${money(inc)}</b></div><div><small>結餘</small><b>${money(inc - out)}</b></div></div>
+      <div class="hr"></div>
+      <div class="kv small"><span>每月預算</span><span><input type="number" min="0" value="${B}" style="width:100px;padding:2px 6px" data-change="budget"> 元</span></div>
+      ${B > 0 ? `<div class="bar ${out > B ? 'r' : out > B * .8 ? 'y' : 'g'}" style="height:14px"><i style="width:${Math.min(100, out / B * 100)}%"></i></div><p class="small" style="margin:4px 0 0">${out > B ? `超出預算 ${money(out - B)}` : `還可以花 ${money(B - out)}`}${ym === thisYM() && out <= B ? `，平均每天 ${money((B - out) / (new Date(+ym.slice(0, 4), +ym.slice(5), 0).getDate() - new Date().getDate() + 1))}` : ''}</p>` : ''}
+      <div class="hr"></div><h4 class="sub-h">支出分類</h4>
+      <div class="catbars">${catArr.map(([k, v]) => `<div class="cb"><span>${ic(OUT_CATS[k] || 'box')} ${k}</span><div class="bar"><i style="width:${v / max * 100}%"></i></div><span>${money(v)}</span></div>`).join('') || '<div class="empty">這個月還沒有支出</div>'}</div>
+    </div>
+    <div class="card">${cardH('receipt', '#e1f1fd', '明細', '', `<span class="muted small">${l.length} 筆</span>`)}
+      ${days.map(d => { const items = byDay[d]; const sum = items.reduce((s, m) => s + (m.type === 'out' ? -m.amount : m.amount), 0);
+        return `<div class="mday"><h4><span>${mdw(d)}</span><span>${money(sum)}</span></h4>${items.map(m => `<div class="mrow"><span class="tile" style="background:${CAT_COLORS[m.cat] || '#eceff3'}">${ic(catIcon(m))}</span><span class="d">${esc(m.note || m.cat)} <span class="muted small">${m.note ? m.cat : ''}</span></span><span class="a ${m.type}">${m.type === 'out' ? '-' : '+'}${money(m.amount)}</span><button class="iconbtn" data-act="delMoney" data-id="${m.id}" aria-label="刪除">${ic('close')}</button></div>`).join('')}</div>`; }).join('') || '<div class="empty">還沒有紀錄</div>'}
+    </div></div>`;
+};
+
+/* ---------- notes ---------- */
+PAGES.notes = () => {
+  const list = [...S.notes].sort((a, b) => (b.pinned - a.pinned) || (b.updatedAt - a.updatedAt));
+  return `<div class="page-h"><h2>筆記與備忘錄</h2><span class="sp"></span><button class="btn y" data-act="newNote">${ic('plus')} 新便利貼</button></div>
+  ${list.length ? `<div class="notes">${list.map(n => `<div class="note ${n.pinned ? 'pinned' : ''}" style="background:${n.color}">
+    ${n.pinned ? `<span class="pinmark">${ic('bookmark')}</span>` : ''}
+    <textarea data-input="noteText" data-id="${n.id}" placeholder="寫點什麼…">${esc(n.text)}</textarea>
+    <div class="nf">${NOTE_COLORS.map(c => `<button class="cdot" style="background:${c}" data-act="noteColor" data-id="${n.id}" data-color="${c}" aria-label="換顏色"></button>`).join('')}<span class="sp"></span>
+    <span class="ts">${new Date(n.updatedAt).getMonth() + 1}/${new Date(n.updatedAt).getDate()}</span>
+    <button class="iconbtn ${n.pinned ? 'on' : ''}" data-act="notePin" data-id="${n.id}" title="${n.pinned ? '取消釘選' : '釘選到儀表板'}">${ic('bookmark')}</button><button class="iconbtn" data-act="delNote" data-id="${n.id}" title="刪除">${ic('trash')}</button></div></div>`).join('')}</div>`
+  : '<div class="card empty">還沒有便利貼～</div>'}`;
+};
+
+/* ---------- review ---------- */
+PAGES.review = () => {
+  const ym = UI.revYM, td = TODAY();
+  const cnt = Object.keys(S.reviews).filter(d => d.startsWith(ym) && (S.reviews[d].photo || S.reviews[d].note)).length;
+  return `<div class="page-h"><h2>每日回顧</h2><span class="sp"></span><div class="navrow"><button class="btn sm w" data-act="revNav" data-n="-1" aria-label="上個月">${ic('chevron-left')}</button><span class="ttl">${ymLabel(ym)}</span><button class="btn sm w" data-act="revNav" data-n="1" aria-label="下個月">${ic('chevron-right')}</button></div></div>
+  <div class="notice">${slime(3)}<p>這個月記錄了 <b class="px">${cnt}</b> 天。不知道寫什麼也沒關係，<b>一張照片</b>就是一天的紀錄，回頭看會發現自己其實做了好多事。</p><button class="btn y" data-act="openReview" data-date="${td}">${ic('plus')} 今天的回顧</button></div>
+  <div class="cal rcal">${['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="wd">${w}</div>`).join('')}
+  ${monthCells(ym).map(({ date, in: inM }) => {
+    const ph = PHOTOS[date], rv = S.reviews[date], fut = date > td;
+    return `<div class="cell ${inM ? '' : 'out'} ${date === td ? 'today' : ''} ${ph ? 'photo' : ''}" ${fut ? '' : `data-act="openReview" data-date="${date}"`} ${ph ? `style="background-image:url(${ph})"` : ''}>
+      <span class="n">${+date.slice(8)}</span>${rv?.note && inM ? `<div class="note-snip">${esc(rv.note)}</div>` : ''}</div>`;
+  }).join('')}</div>`;
+};
+function reviewModal(date) {
+  const rv = S.reviews[date] || {};
+  openModal(`${mdw(date)} 的回顧`, `
+    <div class="rv-photo" id="rvPhoto" style="${PHOTOS[date] ? `background-image:url(${PHOTOS[date]})` : ''}">${PHOTOS[date] ? '' : `<span>${ic('image')} 還沒有照片</span>`}</div>
+    <div class="row" style="margin-bottom:12px"><button class="btn" data-act="pickPhoto" data-date="${date}">${ic('camera')} ${PHOTOS[date] ? '換一張照片' : '選擇照片'}</button>
+      ${PHOTOS[date] ? `<button class="btn sm w" data-act="delPhoto" data-date="${date}">移除照片</button>` : ''}</div>
+    <label class="field"><span>備註（想寫就寫）</span><textarea id="rvNote" rows="3" placeholder="今天…">${esc(rv.note || '')}</textarea></label>
+    <div class="modal-actions"><button class="btn w" data-act="closeModal">關閉</button><button class="btn y" data-act="saveReview" data-date="${date}">儲存</button></div>`);
+}
+
+/* ---------- settings ---------- */
+PAGES.settings = () => `
+  <div class="page-h"><h2>設定</h2></div>
+  <div class="dash" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+    <div class="card">${cardH('university', '#d6edfc', '學期設定', '')}
+      <label class="field"><span>學期第一週的週一</span><input type="date" value="${S.settings.semStart}" data-change="semStart"></label>
+      <p class="small muted">用來計算「現在是第幾週」和課程的每週進度。目前是第 ${semWeek()} 週。</p></div>
+    <div class="card">${cardH('download', '#e2f6e5', '備份資料', '')}
+      <p class="small">資料只存在<b>這個瀏覽器</b>裡。換電腦或換瀏覽器前，先匯出備份，再到新的地方匯入。</p>
+      <div class="row"><button class="btn y" data-act="exportData">${ic('download')} 匯出備份</button><button class="btn w" data-act="importData">${ic('upload')} 匯入備份</button></div></div>
+    <div class="card">${cardH('trash', '#ffe3e9', '清除資料', '')}
+      <p class="small">${S.sampleNotice ? '現在顯示的是範例資料。' : ''}清除後所有待辦、課程、才藝、工作、習慣、記帳、筆記和照片都會刪除，無法復原。</p>
+      <div class="row"><button class="btn pk" data-act="wipe">清除全部資料，從零開始</button></div></div>
+    <div class="card">${cardH('crown', '#fff1c2', '冒險者狀態', '')}
+      <div class="kv"><span>等級</span><b>Lv.${level()}</b></div><div class="kv"><span>總經驗值</span><b>${S.exp} EXP</b></div>
+      <div class="kv"><span>完成的待辦</span><b>${S.tasks.filter(t => t.done).length}</b></div>
+      <div class="kv"><span>習慣打卡總次數</span><b>${S.habits.reduce((s, h) => s + habitTotal(h), 0)}</b></div>
+      <div class="kv"><span>自我學習紀錄</span><b>${S.hobbies.reduce((s, x) => s + x.logs.length, 0)} 次</b></div>
+      <p class="small muted">主線 +${EXP.main}、委託 +${EXP.quest}、一般待辦 +${EXP.task}、學習或上課紀錄 +${EXP.log}、習慣打卡 +${EXP.habit}，每 100 EXP 升一級。</p></div>
+  </div>
+  <p class="small muted" style="margin-top:24px">像素圖示來自 pixelarticons（MIT License）。</p>`;
+
+/* ===================================================================
+   RENDER
+   =================================================================== */
+const page = () => { const p = location.hash.slice(1); return PAGES[p] ? p : 'dash'; };
+function render() {
+  ensureDaily(); save();
+  const p = page(), td = TODAY(), wk = semWeek();
+  $('#nav').innerHTML = NAV.map(([k, i, l, c]) => `<a href="#${k}" class="${k === p ? 'on' : ''}">${tile(i, c)}${l}</a>`).join('');
+  $('#topDate').textContent = `${td.slice(0, 4)}/${md(td)}（${WD[wdOf(td)]}）`;
+  $('#topWeek').textContent = wk >= 1 && wk <= 18 ? `第 ${wk} 週` : '假期中';
+  $('#topLv').innerHTML = `<span class="badge">Lv.${level()}</span><div class="bar y"><i style="width:${S.exp % 100}%"></i></div><span class="exp">${S.exp % 100}/100 EXP</span>`;
+  $('#sideFoot').innerHTML = `完成待辦 ${S.tasks.filter(t => t.done).length} 件<br>回顧 ${Object.keys(S.reviews).length} 天`;
+  const y = scrollY;
+  $('#page').dataset.page = p;
+  $('#page').innerHTML = PAGES[p]();
+  scrollTo(0, y);
+  if (p === 'courses' && !UI.scrolledWeek) { const n = $('#nowWeek'), box = $('#weeksBox'); if (n && box) { box.scrollTop = n.offsetTop - box.offsetTop - 60; UI.scrolledWeek = true; } }
+}
+const commit = () => { save(); render(); };
+function go(p) { if (location.hash.slice(1) === p) render(); else location.hash = p; closeSide(); }
+function closeSide() { $('#side').classList.remove('open'); $('#scrim').classList.remove('open'); }
+window.addEventListener('hashchange', () => { UI.scrolledWeek = false; closeSide(); render(); scrollTo(0, 0); });
+
+/* ===================================================================
+   ACTIONS
+   =================================================================== */
+const val = id => ($('#' + id)?.value ?? '').trim();
+const ACT = {
+  openSide() { $('#side').classList.add('open'); $('#scrim').classList.add('open'); },
+  closeSide,
+  closeModal,
+  go: el => go(el.dataset.page),
+  hideNotice() { S.sampleNotice = false; commit(); },
+  toggle(el) {
+    toggleRef(el.dataset.ref);
+    if (el.dataset.keep === 'day') dayModal(el.dataset.date);
+  },
+  reroll() {
+    const D = S.daily; if (D.rerolled) return;
+    const old = D.quests.filter(r => !refOf(r).done);
+    D.quests = D.quests.filter(r => refOf(r).done);
+    let pool = questPool(D, old); if (pool.length < old.length) pool = [...pool, ...shuffle(old)];
+    pool.slice(0, old.length).forEach(r => D.quests.push(r));
+    D.rerolled = true; toast('委託已重新抽選', 'info'); commit();
+  },
+  pickSw(el) { $$('.sw', el.parentElement).forEach(x => x.classList.remove('on')); el.classList.add('on'); },
+  pickSeg(el) { $$('button', el.parentElement).forEach(x => x.classList.remove('on')); el.classList.add('on'); },
+  addSlot() { $('#slots').insertAdjacentHTML('beforeend', UI.slotTpl); },
+  rmSlot(el) { el.closest('.slot-row').remove(); },
+  // tasks
+  addTask() {
+    const title = val('tTitle'); if (!title) return toast('先寫下要做什麼喔', 'info');
+    S.tasks.push({ id: uid(), title, ddl: val('tDdl'), quad: val('tQuad') || null, hz: val('tHz') || null, done: false, createdAt: Date.now() });
+    commit(); $('#tTitle')?.focus();
+  },
+  taskView(el) { S.settings.taskView = el.dataset.v; commit(); },
+  editTask: el => taskModal(el.dataset.id),
+  saveTask(el) {
+    const t = S.tasks.find(x => x.id === el.dataset.id); if (!t) return;
+    t.title = val('eTitle') || t.title; t.ddl = val('eDdl'); t.quad = val('eQuad') || null; t.hz = val('eHz') || null;
+    closeModal(); commit();
+  },
+  delTask(el) {
+    if (!confirm('確定要刪除這個待辦嗎？')) return;
+    S.tasks = S.tasks.filter(x => x.id !== el.dataset.id); closeModal(); commit();
+  },
+  // courses
+  courseModal: el => courseModal(el.dataset.id),
+  pickCourse(el) { UI.course = el.dataset.id; UI.scrolledWeek = false; render(); },
+  saveCourse(el) {
+    const name = val('cName'); if (!name) return toast('請輸入課程名稱', 'info');
+    const data = { name, teacher: val('cTeacher'), room: val('cRoom'), color: $('#cColor .sw.on')?.dataset.color || COLORS[0], slots: readSlots() };
+    if (el.dataset.id) Object.assign(S.courses.find(c => c.id === el.dataset.id), data);
+    else { const c = { id: uid(), ...data, hw: [], weeks: {} }; S.courses.push(c); UI.course = c.id; }
+    closeModal(); commit();
+  },
+  delCourse(el) {
+    if (!confirm('刪除課程會一起刪除它的作業和每週進度，確定嗎？')) return;
+    S.courses = S.courses.filter(c => c.id !== el.dataset.id); closeModal(); commit();
+  },
+  addHw(el) {
+    const c = S.courses.find(x => x.id === el.dataset.c), title = val('hwTitle'); if (!c || !title) return;
+    c.hw.push({ id: uid(), title, ddl: val('hwDdl'), done: false }); commit(); $('#hwTitle')?.focus();
+  },
+  delHw(el) { const c = S.courses.find(x => x.id === el.dataset.c); c.hw = c.hw.filter(h => h.id !== el.dataset.id); commit(); },
+  weekDone(el) { const c = S.courses.find(x => x.id === el.dataset.c); const w = c.weeks[el.dataset.w] = c.weeks[el.dataset.w] || {}; w.done = !w.done; gainExp(w.done ? EXP.task : -EXP.task); commit(); },
+  // hobbies
+  hobbyModal: el => hobbyModal(el.dataset.id),
+  pickHobby(el) { UI.hobby = el.dataset.id; render(); },
+  saveHobby(el) {
+    const name = val('hoName'); if (!name) return toast('請輸入名稱', 'info');
+    const data = { name, kind: $('#hoKind .on')?.dataset.v || 'class', teacher: val('hoTeacher'), place: val('hoPlace'), target: Math.max(0, Math.round(+val('hoTarget') || 0)), color: $('#hoColor .sw.on')?.dataset.color || COLORS[4], slots: readSlots() };
+    if (el.dataset.id) Object.assign(S.hobbies.find(c => c.id === el.dataset.id), data);
+    else { const x = { id: uid(), ...data, logs: [], goals: [] }; S.hobbies.push(x); UI.hobby = x.id; }
+    closeModal(); commit();
+  },
+  delHobby(el) { if (!confirm('刪除後紀錄和目標都會一起刪除，確定嗎？')) return; S.hobbies = S.hobbies.filter(c => c.id !== el.dataset.id); closeModal(); commit(); },
+  addHobbyLog(el) {
+    const x = S.hobbies.find(c => c.id === el.dataset.id); if (!x) return;
+    const mins = Math.max(0, Math.round(+val('hlMins') || 0)); if (!mins && !val('hlText')) return toast('寫下時間或內容', 'info');
+    x.logs.push({ id: uid(), date: val('hlDate') || TODAY(), mins, text: val('hlText') }); gainExp(EXP.log); commit();
+  },
+  delHobbyLog(el) { const x = S.hobbies.find(c => c.id === el.dataset.id); x.logs = x.logs.filter(l => l.id !== el.dataset.log); gainExp(-EXP.log); commit(); },
+  addGoal(el) { const x = S.hobbies.find(c => c.id === el.dataset.id), t = val('hgText'); if (!x || !t) return; x.goals.push({ id: uid(), text: t, done: false }); commit(); $('#hgText')?.focus(); },
+  goalDone(el) { const x = S.hobbies.find(c => c.id === el.dataset.id), g = x.goals.find(g => g.id === el.dataset.goal); g.done = !g.done; g.doneAt = g.done ? TODAY() : null; gainExp(g.done ? EXP.main : -EXP.main); commit(); },
+  delGoal(el) { const x = S.hobbies.find(c => c.id === el.dataset.id); x.goals = x.goals.filter(g => g.id !== el.dataset.goal); commit(); },
+  // jobs
+  jobModal: el => jobModal(el.dataset.id),
+  pickJob(el) { UI.job = el.dataset.id; render(); },
+  saveJob(el) {
+    const name = val('jName'); if (!name) return toast('請輸入工作名稱', 'info');
+    const data = { name, student: val('jStudent'), place: val('jPlace'), rate: Math.max(0, +val('jRate') || 0), color: $('#jColor .sw.on')?.dataset.color || COLORS[5], slots: readSlots() };
+    if (el.dataset.id) Object.assign(S.jobs.find(c => c.id === el.dataset.id), data);
+    else { const j = { id: uid(), ...data, logs: [] }; S.jobs.push(j); UI.job = j.id; }
+    closeModal(); commit();
+  },
+  delJob(el) { if (!confirm('刪除後所有上課紀錄都會一起刪除，確定嗎？')) return; S.jobs = S.jobs.filter(c => c.id !== el.dataset.id); closeModal(); commit(); },
+  addJobLog(el) {
+    const j = S.jobs.find(c => c.id === el.dataset.id); if (!j) return;
+    const start = val('jlStart'), end = val('jlEnd'); if (!start || !end || end <= start) return toast('請確認上課時間', 'info');
+    j.logs.push({ id: uid(), date: val('jlDate') || TODAY(), start, end, content: val('jlContent'), hw: val('jlHw'), next: val('jlNext'), paid: false });
+    gainExp(EXP.log); commit();
+  },
+  delJobLog(el) {
+    if (!confirm('刪除這筆上課紀錄？')) return;
+    const j = S.jobs.find(c => c.id === el.dataset.id); j.logs = j.logs.filter(l => l.id !== el.dataset.log);
+    S.money = S.money.filter(m => m.link !== el.dataset.log); gainExp(-EXP.log); commit();
+  },
+  togglePaid(el) {
+    const j = S.jobs.find(c => c.id === el.dataset.id), l = j.logs.find(x => x.id === el.dataset.log);
+    l.paid = !l.paid;
+    if (l.paid) { const amount = Math.round(hrs(l.start, l.end) * (+j.rate || 0)); if (amount > 0) { S.money.push({ id: uid(), date: TODAY(), type: 'in', amount, cat: '打工', note: `${j.name} ${md(l.date)}`, link: l.id }); toast(`已記入收入 ${money(amount)}`, 'info'); } }
+    else S.money = S.money.filter(m => m.link !== l.id);
+    commit();
+  },
+  // calendar
+  calView(el) { S.settings.calView = el.dataset.v; commit(); },
+  calNav(el) { const n = +el.dataset.n; if (S.settings.calView === 'month') UI.calYM = ymShift(UI.calYM, n); else UI.calWeek = addDays(UI.calWeek, 7 * n); render(); },
+  calToday() { UI.calYM = thisYM(); UI.calWeek = mondayOf(TODAY()); render(); },
+  dayModal: el => dayModal(el.dataset.date),
+  addEvent(el) {
+    const title = val('evTitle'); if (!title) return toast('請輸入行程名稱', 'info');
+    S.events.push({ id: uid(), date: el.dataset.date, time: val('evTime'), title, color: $('#evColor .sw.on')?.dataset.color || COLORS[0] });
+    commit(); dayModal(el.dataset.date);
+  },
+  delEvent(el) { S.events = S.events.filter(e => e.id !== el.dataset.id); commit(); dayModal(el.dataset.date); },
+  // habits
+  habitModal,
+  pickIcon(el) { $$('#hIcon button').forEach(x => x.classList.remove('on')); el.classList.add('on'); },
+  pickFreq(el) {
+    $$('#hFreq button').forEach(x => x.classList.remove('on')); el.classList.add('on');
+    $('#hDaysBox').classList.toggle('hidden', el.dataset.v !== 'custom');
+    $('#hFreqHint').textContent = { daily: '每日：卡片上會出現當月的日期格子。', weekly: '每週：卡片上會出現最近 12 週的格子，一週打卡一次。', monthly: '每月：卡片上會出現今年 12 個月的格子。', custom: '自訂：只有選到的星期幾可以打卡，其他天的格子會變灰。' }[el.dataset.v];
+  },
+  saveHabit() {
+    const name = val('hName'); if (!name) return toast('請輸入習慣名稱', 'info');
+    const freq = $('#hFreq .on').dataset.v;
+    const days = $$('#hDaysBox input:checked').map(x => +x.value);
+    if (freq === 'custom' && !days.length) return toast('至少選一天', 'info');
+    S.habits.push({ id: uid(), name, icon: $('#hIcon .on').dataset.v, freq, days, log: {}, archived: false, createdAt: TODAY() });
+    closeModal(); commit();
+  },
+  habit(el) {
+    const h = S.habits.find(x => x.id === el.dataset.id); if (!h) return;
+    const k = el.dataset.key;
+    if (h.log[k]) { delete h.log[k]; gainExp(-EXP.habit); } else { h.log[k] = true; gainExp(EXP.habit); }
+    commit();
+  },
+  hMonth(el) { const h = S.habits.find(x => x.id === el.dataset.id); UI.hMonth[el.dataset.id] = ymShift(UI.hMonth[el.dataset.id] || (h.archived && h.archivedAt ? h.archivedAt.slice(0, 7) : thisYM()), +el.dataset.n); render(); },
+  archive(el) { const h = S.habits.find(x => x.id === el.dataset.id); h.archived = true; h.archivedAt = TODAY(); toast('習慣結業！紀錄會好好保存', 'info'); commit(); },
+  unarchive(el) { const h = S.habits.find(x => x.id === el.dataset.id); h.archived = false; commit(); },
+  delHabit(el) { if (!confirm('刪除後打卡紀錄也會消失。如果只是不想繼續，可以按「結業」保留紀錄。確定刪除？')) return; S.habits = S.habits.filter(x => x.id !== el.dataset.id); commit(); },
+  // money
+  mType(el) { UI.mType = el.dataset.v; UI.mCat = null; render(); },
+  pickCat(el) { UI.mCat = el.dataset.v; $$('.catpick button').forEach(x => x.classList.toggle('on', x === el)); },
+  monNav(el) { UI.monYM = ymShift(UI.monYM, +el.dataset.n); render(); },
+  addMoney() {
+    const amount = Math.round(+val('mAmt')); if (!amount || amount <= 0) return toast('請輸入金額', 'info');
+    const date = val('mDate') || TODAY();
+    S.money.push({ id: uid(), date, type: UI.mType || 'out', amount, cat: UI.mCat, note: val('mNote') });
+    UI.monYM = date.slice(0, 7); commit(); $('#mAmt')?.focus();
+  },
+  delMoney(el) { S.money = S.money.filter(m => m.id !== el.dataset.id); commit(); },
+  // notes
+  quickNote() {
+    const text = val('qnote'); if (!text) return;
+    S.notes.push({ id: uid(), text, color: NOTE_COLORS[0], pinned: false, updatedAt: Date.now() });
+    toast('已記下', 'info'); commit(); $('#qnote')?.focus();
+  },
+  newNote() {
+    S.notes.push({ id: uid(), text: '', color: NOTE_COLORS[S.notes.length % NOTE_COLORS.length], pinned: false, updatedAt: Date.now() + 1e6 });
+    commit(); $('.note textarea')?.focus();
+  },
+  noteColor(el) { const n = S.notes.find(x => x.id === el.dataset.id); n.color = el.dataset.color; commit(); },
+  notePin(el) { const n = S.notes.find(x => x.id === el.dataset.id); n.pinned = !n.pinned; commit(); },
+  delNote(el) { if (!confirm('刪除這張便利貼？')) return; S.notes = S.notes.filter(x => x.id !== el.dataset.id); commit(); },
+  // review
+  revNav(el) { UI.revYM = ymShift(UI.revYM, +el.dataset.n); render(); },
+  openReview: el => reviewModal(el.dataset.date),
+  pickPhoto(el) { UI.photoDate = el.dataset.date; const f = $('#hiddenFile'); f.value = ''; f.click(); },
+  async delPhoto(el) {
+    const d = el.dataset.date; await DB.del(d);
+    if (PHOTOS[d]) { URL.revokeObjectURL(PHOTOS[d]); delete PHOTOS[d]; }
+    if (S.reviews[d]) { S.reviews[d].photo = false; if (!S.reviews[d].note) delete S.reviews[d]; }
+    commit(); reviewModal(d);
+  },
+  saveReview(el) {
+    const d = el.dataset.date, note = $('#rvNote').value.trim();
+    if (note || PHOTOS[d]) S.reviews[d] = Object.assign({}, S.reviews[d], { note, photo: !!PHOTOS[d] }); else delete S.reviews[d];
+    closeModal(); toast('回顧已儲存', 'info'); commit();
+  },
+  // settings
+  async exportData() {
+    const all = await DB.all(), photos = {};
+    for (const k in all) photos[k] = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(all[k]); });
+    const blob = new Blob([JSON.stringify({ app: 'pixel-quest-desk', version: 2, state: S, photos })], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `pixel-quest-desk-${TODAY()}.json`; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast('備份已下載', 'info');
+  },
+  importData() { const f = $('#importFile'); f.value = ''; f.click(); },
+  async wipe() {
+    if (!confirm('確定要清除全部資料嗎？這個動作無法復原。')) return;
+    S = DEFAULT(); S.seeded = true; await DB.clear();
+    for (const k in PHOTOS) { URL.revokeObjectURL(PHOTOS[k]); delete PHOTOS[k]; }
+    toast('已清空，開始新的冒險吧！', 'info'); go('dash');
+  }
+};
+
+/* ---------- event wiring ---------- */
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]');
+  if (a && ACT[a.dataset.act]) { e.preventDefault(); ACT[a.dataset.act](a, e); return; }
+  if (e.target.closest('input,textarea,select,label,a')) return;
+  const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#modal').hidden) closeModal();
+  if (e.key === 'Enter' && !e.isComposing && e.target.dataset?.enter) { e.preventDefault(); ACT[e.target.dataset.enter](e.target); }
+});
+const CHG = {
+  hideDone: el => { S.settings.hideDone = el.checked; commit(); },
+  weekText: el => { const c = S.courses.find(x => x.id === el.dataset.c); (c.weeks[el.dataset.w] = c.weeks[el.dataset.w] || {}).text = el.value; save(); },
+  budget: el => { S.settings.budget = Math.max(0, Math.round(+el.value || 0)); commit(); },
+  semStart: el => { if (el.value) { S.settings.semStart = el.value; commit(); } }
+};
+document.addEventListener('change', e => { const k = e.target.dataset?.change; if (k && CHG[k]) CHG[k](e.target); });
+document.addEventListener('input', e => {
+  if (e.target.dataset?.input === 'noteText') { const n = S.notes.find(x => x.id === e.target.dataset.id); if (n) { n.text = e.target.value; n.updatedAt = Date.now(); save(); } }
+});
+$('#hiddenFile').addEventListener('change', async e => {
+  const f = e.target.files[0], d = UI.photoDate; if (!f || !d) return;
+  const note = $('#rvNote')?.value;
+  if (await setPhoto(d, f)) { if (note !== undefined) { S.reviews[d].note = note.trim(); save(); } render(); reviewModal(d); }
+});
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (data.app !== 'pixel-quest-desk' || !data.state) throw 0;
+    if (!confirm('匯入會覆蓋目前所有資料，確定嗎？')) return;
+    S = Object.assign(DEFAULT(), data.state); S.settings = Object.assign(DEFAULT().settings, S.settings);
+    await DB.clear(); for (const k in PHOTOS) { URL.revokeObjectURL(PHOTOS[k]); delete PHOTOS[k]; }
+    for (const k in data.photos || {}) { const b = await (await fetch(data.photos[k])).blob(); await DB.put(k, b); PHOTOS[k] = URL.createObjectURL(b); }
+    toast('匯入完成', 'info'); commit();
+  } catch (err) { toast('這不是正確的備份檔', 'info'); }
+});
+document.addEventListener('dragstart', e => { const t = e.target.closest?.('[data-drag]'); if (t) { e.dataTransfer.setData('text/plain', t.dataset.drag); e.dataTransfer.effectAllowed = 'move'; t.classList.add('dragging'); } });
+document.addEventListener('dragend', () => $$('.dragging,.over').forEach(x => x.classList.remove('dragging', 'over')));
+document.addEventListener('dragover', e => { const z = e.target.closest?.('[data-zone]'); if (z) { e.preventDefault(); $$('.over').forEach(x => x !== z && x.classList.remove('over')); z.classList.add('over'); } });
+document.addEventListener('drop', e => {
+  const z = e.target.closest?.('[data-zone]'); if (!z) return; e.preventDefault();
+  const t = S.tasks.find(x => x.id === e.dataTransfer.getData('text/plain')); if (!t) return;
+  const [f, v] = z.dataset.zone.split(':'); t[f] = v === 'none' ? null : v; commit();
+});
+
+/* ===================================================================
+   SAMPLE DATA (first visit only)
+   =================================================================== */
+function seed() {
+  const td = TODAY(), d = n => addDays(td, n), now = Date.now();
+  const T = (title, o = {}) => ({ id: uid(), title, ddl: '', quad: null, hz: null, done: false, createdAt: now, ...o });
+  S.tasks = [
+    T('洗衣服'), T('換滑鼠電池'), T('回覆社團訊息'), T('買衛生紙'), T('整理書桌'), T('把相簿的照片備份'),
+    T('報名多益考試', { ddl: d(3), quad: 'q1', hz: 'week' }),
+    T('準備期中考範圍筆記', { ddl: d(12), quad: 'q2', hz: 'month' }),
+    T('預約健康檢查', { quad: 'q3', hz: 'week' }),
+    T('讀完一本小說', { quad: 'q4', hz: 'year' }),
+    T('每週慢跑三次', { quad: 'q2', hz: 'week' }),
+    T('學會做一道新料理', { hz: 'month' }),
+    T('繳手機費', { done: true, doneAt: d(-1), hz: 'any', exp: 10 })
+  ];
+  const C = (name, teacher, room, color, slots, hw) => ({ id: uid(), name, teacher, room, color, slots, hw: hw.map(([t, n, done]) => ({ id: uid(), title: t, ddl: d(n), done: !!done })), weeks: {} });
+  S.courses = [
+    C('生成式 AI 導論', '王老師', '綜合 201', '#9ad3f7', [{ day: 4, start: '13:20', end: '15:10' }], [['Vibe Coding 互動網頁', 11], ['課堂反思心得', -3, true]]),
+    C('微積分', '林老師', '理學 105', '#ffd866', [{ day: 1, start: '10:10', end: '12:00' }, { day: 3, start: '10:10', end: '11:00' }], [['習題 3.1–3.4', 2]]),
+    C('大一英文', 'Ms. Chen', '文學 302', '#ff9fb2', [{ day: 2, start: '09:10', end: '11:00' }], [['Reading Report', 6]]),
+    C('程式設計', '張老師', '電算 B1', '#86d595', [{ day: 5, start: '14:20', end: '17:20' }], [])
+  ];
+  const wk = semWeek(); S.courses[0].weeks = { [wk - 1]: { text: 'Prompt 技巧、規格書', done: true }, [wk]: { text: 'Vibe Coding 實作', done: false } };
+  S.courses[1].weeks = { [wk - 1]: { text: '2.5 連鎖律', done: true }, [wk]: { text: '3.1–3.4 導數應用', done: false } };
+  S.events = [
+    { id: uid(), date: td, time: '18:30', title: '社團幹部會議', color: '#c7a8f5' },
+    { id: uid(), date: d(2), time: '12:00', title: '和小美吃午餐', color: '#ffb36b' },
+    { id: uid(), date: d(5), time: '', title: '家人生日', color: '#ff9fb2' }
+  ];
+  const log = (n, p) => { const l = {}; for (let i = 1; i <= n; i++) if (Math.random() < p) l[d(-i)] = true; return l; };
+  const wlog = {}; for (let i = 1; i <= 5; i++) wlog[mondayOf(d(-7 * i))] = true;
+  S.habits = [
+    { id: uid(), name: '喝 8 杯水', icon: 'waves', freq: 'daily', days: [], log: Object.assign(log(20, .8), { [d(-1)]: true, [d(-2)]: true }), archived: false, createdAt: d(-25) },
+    { id: uid(), name: '運動 30 分鐘', icon: 'human-arms-up', freq: 'custom', days: [1, 3, 5], log: log(20, .5), archived: false, createdAt: d(-25) },
+    { id: uid(), name: '背 20 個英文單字', icon: 'book-open', freq: 'weekly', days: [], log: wlog, archived: false, createdAt: d(-40) },
+    { id: uid(), name: '整理房間大掃除', icon: 'home', freq: 'monthly', days: [], log: { [ymShift(thisYM(), -1)]: true }, archived: false, createdAt: d(-60) },
+    { id: uid(), name: '暑假每天早起', icon: 'sun', freq: 'daily', days: [], log: Object.fromEntries(Object.entries(log(90, .9)).filter(([k]) => k <= d(-30))), archived: true, archivedAt: d(-30), createdAt: d(-90) }
+  ];
+  const M = (n, type, amount, cat, note) => ({ id: uid(), date: d(-n), type, amount, cat, note });
+  S.money = [M(0, 'out', 85, '餐飲', '早餐蛋餅＋奶茶'), M(0, 'out', 30, '交通', '公車'), M(1, 'out', 120, '餐飲', '午餐便當'), M(1, 'out', 399, '購物', '文具'),
+    M(2, 'out', 260, '娛樂', '電影'), M(3, 'in', 5000, '零用錢', '這個月零用錢'), M(3, 'out', 150, '生活', '洗衣精'), M(4, 'out', 450, '學習', '原文書影印')];
+  S.notes = [
+    { id: uid(), text: '期中考週前要把微積分習題寫完！', color: '#fff6c9', pinned: true, updatedAt: now },
+    { id: uid(), text: '想看的電影：\n- 沙丘 3\n- 動物方城市 2', color: '#e1f1fd', pinned: false, updatedAt: now - 1000 },
+    { id: uid(), text: '社團會議要提：期末成發場地', color: '#ffe3e9', pinned: true, updatedAt: now - 2000 }
+  ];
+  S.reviews = { [d(-1)]: { note: '和室友去吃了新開的拉麵', photo: false }, [d(-3)]: { note: '終於把報告交出去了！', photo: false } };
+  S.exp = 135; S.seeded = true; S.sampleNotice = true;
+  seedV2();
+}
+function seedV2() {
+  const td = TODAY(), d = n => addDays(td, n), wk0 = mondayOf(td);
+  const L = (n, mins, text) => ({ id: uid(), date: addDays(wk0, n), mins, text });
+  S.hobbies = [
+    { id: uid(), name: '畫畫課', kind: 'class', teacher: '陳老師', place: '小島畫室', color: '#c7a8f5', target: 0, slots: [{ day: 6, start: '10:00', end: '12:00' }],
+      logs: [L(-2, 120, '水彩疊色、畫靜物（蘋果和杯子）'), L(-9, 120, '素描明暗練習')], goals: [{ id: uid(), text: '完成一幅風景水彩', done: false }, { id: uid(), text: '學會濕中濕技法', done: true, doneAt: d(-2) }] },
+    { id: uid(), name: '排球系隊練習', kind: 'practice', teacher: '學長姐', place: '體育館', color: '#ffb36b', target: 240, slots: [{ day: 2, start: '18:30', end: '20:30' }, { day: 4, start: '18:30', end: '20:30' }],
+      logs: [L(1, 120, '接發球、扣球助跑'), L(-4, 120, '分組比賽')], goals: [{ id: uid(), text: '上手發球成功率 7 成', done: false }] },
+    { id: uid(), name: '吉他課', kind: 'class', teacher: 'Leo', place: '樂器行 2F', color: '#86d595', target: 150, slots: [{ day: 3, start: '19:00', end: '20:00' }],
+      logs: [L(2, 60, 'F 和弦封閉指法'), L(0, 30, '自己練 C-Am-F-G'), L(-5, 60, '刷法節奏練習')], goals: [{ id: uid(), text: '學會 F 和弦', done: false }, { id: uid(), text: '彈完一首完整的歌', done: false }] },
+    { id: uid(), name: '英文線上口說', kind: 'class', teacher: 'Teacher Amy', place: '線上', color: '#7fd8d0', target: 60, slots: [{ day: 1, start: '21:00', end: '21:30' }, { day: 5, start: '21:00', end: '21:30' }],
+      logs: [L(0, 30, '自我介紹＆談興趣')], goals: [{ id: uid(), text: '可以不看稿講 3 分鐘', done: false }] }
+  ].map(x => ({ ...x, logs: x.logs.filter(l => l.date <= td) }));
+  const jl = (n, content, hw, next, paid) => ({ id: uid(), date: d(n), start: '18:30', end: '20:30', content, hw, next, paid });
+  S.jobs = [{ id: uid(), name: '家教・國三數學', student: '小宇', place: '學生家', rate: 600, color: '#ffd866', slots: [{ day: 1, start: '18:30', end: '20:30' }],
+    logs: [jl(-3, '一元二次方程式：配方法', '講義 p.12–15', '公式解、檢討作業', false), jl(-7, '因式分解複習', '講義 p.8–11', '配方法', true), jl(-10, '段考考卷檢討', '', '因式分解', true)] }];
+}
+async function samplePhotos() {
+  const scenes = [[-1, '#ffb36b', '#ffd866'], [-3, '#9ad3f7', '#86d595'], [-6, '#c7a8f5', '#ff9fb2'], [-9, '#7fd8d0', '#ffffff']];
+  for (const [n, sky, ground] of scenes) {
+    const date = addDays(TODAY(), n);
+    const c = document.createElement('canvas'); c.width = 64; c.height = 48; const g = c.getContext('2d');
+    g.fillStyle = sky; g.fillRect(0, 0, 64, 48);
+    g.fillStyle = '#ffffff'; [[8, 8, 10], [40, 12, 14], [24, 4, 6]].forEach(([x, y, w]) => { g.fillRect(x, y, w, 3); g.fillRect(x + 2, y - 2, w - 4, 2); });
+    g.fillStyle = '#fff6b8'; g.fillRect(50, 4, 6, 6);
+    g.fillStyle = ground; for (let x = 0; x < 64; x += 4) g.fillRect(x, 30 + ((x * 7) % 5), 4, 20);
+    g.fillStyle = '#203650'; g.fillRect(28, 26, 8, 6); g.fillStyle = '#9ad3f7'; g.fillRect(29, 27, 6, 4);
+    const big = document.createElement('canvas'); big.width = 640; big.height = 480; const bg = big.getContext('2d');
+    bg.imageSmoothingEnabled = false; bg.drawImage(c, 0, 0, 640, 480);
+    const blob = await new Promise(r => big.toBlob(r, 'image/png'));
+    if (blob) { await DB.put(date, blob).catch(() => { }); PHOTOS[date] = URL.createObjectURL(blob); S.reviews[date] = Object.assign({ note: '' }, S.reviews[date], { photo: true }); }
+  }
+  save();
+}
+
+/* ---------- boot ---------- */
+(async function boot() {
+  load();
+  $('#logo').innerHTML = slime(3);
+  await DB.open(); await loadPhotos();
+  if (S.sampleNotice && !S.samplePics) { S.samplePics = true; await samplePhotos(); }
+  render();
+  let last = TODAY();
+  setInterval(() => { if (TODAY() !== last) { last = TODAY(); render(); } }, 60000);
+})();
+</script>
+</body>
+</html>

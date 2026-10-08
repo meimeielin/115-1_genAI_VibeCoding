@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>像素冒險手帳 Pixel Quest Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e9f6ff; --paper:#ffffff; --soft:#d6edfc; --soft2:#f2faff;
+  --blue:#9ad3f7; --blue2:#5fb2ea; --blue3:#2f78b7;
+  --ink:#203650; --muted:#6a7f96; --line:#203650; --shadow:#a9d4f1;
+  --yellow:#ffd866; --pink:#ff9fb2; --green:#86d595; --red:#ee6b6b; --orange:#ffb36b;
+  --pixel:'DotGothic16','PingFang TC','Microsoft JhengHei',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--sans); color:var(--ink); font-size:15px; line-height:1.5;
+  background-color:var(--bg);
+  background-image:linear-gradient(rgba(95,178,234,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(95,178,234,.10) 1px,transparent 1px);
+  background-size:16px 16px;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{font-family:var(--pixel);font-weight:400;margin:0}
+.px{font-family:var(--pixel)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.hidden{display:none!important}
+
+/* ---------- layout ---------- */
+.app{display:grid;grid-template-columns:210px 1fr;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;background:var(--blue);border-right:3px solid var(--line);display:flex;flex-direction:column;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;padding:16px 14px;border-bottom:3px solid var(--line);background:var(--soft2)}
+.brand b{font-family:var(--pixel);font-size:15px;line-height:1.2;font-weight:400}
+.brand small{display:block;font-family:var(--pixel);font-size:10px;color:var(--muted);letter-spacing:.5px}
+.nav{padding:10px 8px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;flex:1}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;text-decoration:none;color:var(--ink);font-family:var(--pixel);font-size:15px;border:3px solid transparent}
+.nav a:hover{background:rgba(255,255,255,.45)}
+.nav a.on{background:var(--paper);border-color:var(--line);box-shadow:3px 3px 0 var(--blue3)}
+.nav .ic{width:22px;text-align:center}
+.side-foot{padding:12px 14px;border-top:3px solid var(--line);font-size:12px;font-family:var(--pixel);background:var(--soft2)}
+
+.main{min-width:0}
+.top{display:flex;align-items:center;gap:14px;padding:12px 24px;border-bottom:3px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:20}
+.top .date{font-family:var(--pixel);font-size:16px}
+.top .wk{font-family:var(--pixel);font-size:13px;background:var(--soft);border:2px solid var(--line);padding:1px 8px}
+.top .sp{flex:1}
+.lv{display:flex;align-items:center;gap:8px;font-family:var(--pixel)}
+.lv .badge{background:var(--yellow);border:2px solid var(--line);padding:0 8px;font-size:14px}
+.bar{height:12px;border:2px solid var(--line);background:var(--soft2);position:relative;min-width:60px}
+.bar>i{position:absolute;inset:0 auto 0 0;background:var(--blue2);display:block}
+.bar.y>i{background:var(--yellow)}
+.bar.g>i{background:var(--green)}
+.bar.r>i{background:var(--red)}
+.bar.stripes>i{background-image:repeating-linear-gradient(90deg,transparent 0 6px,rgba(255,255,255,.45) 6px 8px)}
+.lv .bar{width:120px}
+.lv .exp{font-size:12px;color:var(--muted)}
+.burger{display:none}
+.page{padding:22px 24px 80px;max-width:1300px}
+.page-h{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-h h2{font-size:24px}
+.page-h h2::before{content:"▶ ";color:var(--blue2)}
+.page-h .sp{flex:1}
+
+/* ---------- pieces ---------- */
+.card{background:var(--paper);border:3px solid var(--line);box-shadow:5px 5px 0 var(--shadow);padding:14px 16px;min-width:0}
+.card-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.card-h h3{font-size:16px;flex:1}
+.card-h .more{font-family:var(--pixel);font-size:12px;color:var(--blue3)}
+[data-go]{cursor:pointer}
+.card[data-go]:hover{box-shadow:5px 5px 0 var(--blue2)}
+
+.btn{font-family:var(--pixel);font-size:14px;border:3px solid var(--line);background:var(--blue);padding:5px 12px;box-shadow:3px 3px 0 var(--line);cursor:pointer;white-space:nowrap;line-height:1.3}
+.btn:hover{background:#b3dffa}
+.btn:active{transform:translate(3px,3px);box-shadow:none}
+.btn.w{background:var(--paper)}
+.btn.y{background:var(--yellow)}
+.btn.pk{background:var(--pink)}
+.btn.sm{font-size:12px;padding:2px 8px;border-width:2px;box-shadow:2px 2px 0 var(--line)}
+.btn.sm:active{transform:translate(2px,2px)}
+.btn.on{background:var(--yellow)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:3px 3px 0 var(--line)}
+.iconbtn{border:0;background:none;cursor:pointer;padding:2px 6px;font-size:15px;color:var(--muted)}
+.iconbtn:hover{color:var(--ink)}
+.seg{display:inline-flex;border:3px solid var(--line);box-shadow:3px 3px 0 var(--line)}
+.seg button{border:0;background:var(--paper);font-family:var(--pixel);padding:4px 12px;cursor:pointer;font-size:14px}
+.seg button+button{border-left:3px solid var(--line)}
+.seg button.on{background:var(--blue)}
+
+input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{border:2px solid var(--line);background:var(--paper);padding:6px 8px;border-radius:0;outline:none;min-width:0}
+input:focus,select:focus,textarea:focus{box-shadow:3px 3px 0 var(--blue2)}
+textarea{resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>.grow{flex:1 1 160px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field>span{font-family:var(--pixel);font-size:13px}
+.chip{display:inline-block;font-size:12px;border:2px solid var(--line);padding:0 6px;background:var(--soft2);font-family:var(--pixel);line-height:1.5;white-space:nowrap}
+.chip.hot{background:var(--red);color:#fff}
+.chip.warm{background:var(--orange)}
+.chip.ok{background:var(--green)}
+.chip.y{background:var(--yellow)}
+.empty{color:var(--muted);font-size:13px;padding:8px 0;text-align:center}
+.hr{border-top:2px dashed var(--shadow);margin:10px 0}
+
+/* checkbox */
+.chk{width:22px;height:22px;flex:0 0 22px;border:3px solid var(--line);background:var(--paper);cursor:pointer;padding:0;display:grid;place-items:center;font-family:var(--pixel);font-size:14px;line-height:1}
+.chk:hover{background:var(--soft)}
+.done .chk,.chk.on{background:var(--green)}
+.done .chk::after,.chk.on::after{content:"✓"}
+
+/* task item */
+.task{display:flex;align-items:center;gap:10px;padding:8px 10px;border:2px solid var(--line);background:var(--paper);position:relative;margin-bottom:8px}
+.task[draggable=true]{cursor:grab}
+.task.dragging{opacity:.4}
+.task .tt{flex:1;min-width:0}
+.task .name{word-break:break-word}
+.task .meta{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.task.done{background:var(--soft2);border-style:dashed}
+.task.done .name{text-decoration:line-through;color:var(--muted)}
+.task.done::after{content:"CLEAR!";position:absolute;right:38px;top:50%;transform:translateY(-50%) rotate(-8deg);font-family:var(--pixel);font-size:13px;color:var(--blue3);border:2px solid var(--blue3);padding:0 5px;background:rgba(255,255,255,.8);pointer-events:none}
+
+/* ---------- dashboard ---------- */
+.hello{display:flex;gap:16px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.hello h2{font-size:22px}
+.hello p{margin:2px 0 0}
+.dash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.span2{grid-column:span 2}
+.span3{grid-column:1/-1}
+.quest{background:linear-gradient(var(--paper),var(--paper)) padding-box;}
+.qsec{font-family:var(--pixel);font-size:13px;margin:4px 0 8px;display:flex;align-items:center;gap:6px}
+.qsec::after{content:"";flex:1;border-top:2px dashed var(--shadow)}
+.qitem{display:flex;align-items:center;gap:10px;padding:9px 10px;border:2px solid var(--line);margin-bottom:8px;background:var(--paper);position:relative}
+.qitem.main{background:#fff8dc;border-width:3px}
+.qitem .ico{font-family:var(--pixel);color:var(--blue3);width:16px;text-align:center}
+.qitem.main .ico{color:#d49a00}
+.qitem .tt{flex:1;min-width:0}
+.qitem .xp{font-family:var(--pixel);font-size:12px;background:var(--yellow);border:2px solid var(--line);padding:0 5px}
+.qitem.done{opacity:.7;background:var(--soft2)}
+.qitem.done .tt{text-decoration:line-through}
+.qitem.done .xp{background:var(--green)}
+.qprog{display:flex;align-items:center;gap:10px;margin-top:6px;font-family:var(--pixel);font-size:13px}
+.qprog .bar{flex:1}
+.allclear{text-align:center;font-family:var(--pixel);padding:6px;background:var(--yellow);border:2px solid var(--line);margin-top:8px}
+.sched{list-style:none;margin:0;padding:0}
+.sched li{display:flex;gap:10px;padding:6px 0;border-bottom:2px dotted var(--soft);align-items:center}
+.sched .t{font-family:var(--pixel);font-size:13px;width:92px;flex:0 0 92px;color:var(--muted)}
+.sched .dot{width:10px;height:10px;border:2px solid var(--line);flex:0 0 10px}
+.kv{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0}
+.kv b{font-family:var(--pixel);font-weight:400}
+.big{font-family:var(--pixel);font-size:24px}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stat3>div{border:2px solid var(--line);padding:6px 4px;background:var(--soft2)}
+.stat3 small{display:block;font-size:12px;color:var(--muted)}
+.stat3 b{font-family:var(--pixel);font-weight:400;font-size:17px}
+.hab-mini{display:flex;align-items:center;gap:8px;padding:5px 0}
+.hab-mini .nm{flex:1}
+.review-thumb{width:100%;aspect-ratio:4/3;border:3px solid var(--line);background:var(--soft2) center/cover no-repeat;display:grid;place-items:center;font-family:var(--pixel);color:var(--muted);cursor:pointer;text-align:center}
+.notice{border:3px dashed var(--blue2);background:var(--soft2);padding:10px 14px;margin-bottom:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.notice p{margin:0;flex:1 1 240px}
+.pinlist{list-style:none;padding:0;margin:8px 0 0}
+.pinlist li{padding:6px 8px;border:2px solid var(--line);margin-bottom:6px;font-size:14px;white-space:pre-wrap;word-break:break-word;max-height:4.8em;overflow:hidden}
+
+/* ---------- tasks ---------- */
+.addbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.addbar input[type=text]{flex:1 1 220px}
+.quadwrap{display:grid;grid-template-columns:28px 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:10px}
+.axis{font-family:var(--pixel);font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--blue3)}
+.axis.v{writing-mode:vertical-rl;letter-spacing:4px}
+.zone{border:3px solid var(--line);background:var(--paper);padding:10px;min-height:150px;box-shadow:4px 4px 0 var(--shadow);transition:background .1s}
+.zone.over{background:#fff8dc;border-style:dashed}
+.zone h4{font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.zone.q1{background:#fff1f3}.zone.q2{background:#f0f8ff}.zone.q3{background:#fff8ec}.zone.q4{background:#f6f6f6}
+.zone.q1 h4{color:#c2415a}
+.cols4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.zone.none{margin-top:18px;min-height:90px;background:var(--soft2);border-style:dashed}
+.zone.none .tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0 10px}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar label{display:flex;gap:6px;align-items:center;font-family:var(--pixel);font-size:13px;cursor:pointer}
+
+/* ---------- courses ---------- */
+.tt-grid{display:grid;border:3px solid var(--line);background:var(--paper);position:relative;overflow-x:auto}
+.tt-head{font-family:var(--pixel);text-align:center;padding:6px;border-bottom:3px solid var(--line);background:var(--soft);font-size:14px}
+.tt-head.today{background:var(--yellow)}
+.tt-col{position:relative;border-left:2px dashed var(--soft)}
+.tt-time{font-family:var(--pixel);font-size:11px;color:var(--muted);position:relative}
+.tt-time span{position:absolute;right:4px;transform:translateY(-50%)}
+.tt-line{position:absolute;left:0;right:0;border-top:1px dashed #e4f1fb}
+.tt-blk{position:absolute;left:3px;right:3px;border:2px solid var(--line);padding:3px 5px;font-size:12px;overflow:hidden;cursor:pointer;line-height:1.3}
+.tt-blk b{display:block;font-family:var(--pixel);font-weight:400;font-size:13px}
+.course-list{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.cchip{border:3px solid var(--line);padding:6px 12px;cursor:pointer;font-family:var(--pixel);box-shadow:3px 3px 0 var(--line);background:var(--paper);display:flex;gap:8px;align-items:center}
+.cchip i{width:12px;height:12px;border:2px solid var(--line);display:inline-block}
+.cchip.on{transform:translate(3px,3px);box-shadow:none;background:var(--yellow)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.weeks{max-height:520px;overflow-y:auto;padding-right:4px}
+.wk-row{display:flex;gap:8px;align-items:center;padding:5px 6px;border-bottom:2px dotted var(--soft)}
+.wk-row.now{background:#fff8dc;outline:2px solid var(--line)}
+.wk-row .wl{font-family:var(--pixel);font-size:12px;width:72px;flex:0 0 72px;line-height:1.2}
+.wk-row input[type=text]{flex:1;padding:4px 6px}
+.wk-row.done input[type=text]{text-decoration:line-through;color:var(--muted)}
+.slot-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.sw{width:26px;height:26px;border:3px solid var(--line);cursor:pointer;padding:0}
+.sw.on{outline:3px solid var(--blue2);outline-offset:2px}
+
+/* ---------- calendar ---------- */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:3px solid var(--line);background:var(--paper)}
+.cal .wd{font-family:var(--pixel);text-align:center;padding:5px;background:var(--soft);border-bottom:3px solid var(--line);font-size:13px}
+.cal .cell{min-height:104px;border-right:2px solid var(--soft);border-bottom:2px solid var(--soft);padding:4px;position:relative;cursor:pointer;background-size:cover;background-position:center;overflow:hidden}
+.cal .cell:nth-child(7n){border-right:0}
+.cal .cell.out{background-color:#f6fbff;color:#b1c3d4}
+.cal .cell:hover{outline:3px solid var(--blue2);outline-offset:-3px;z-index:1}
+.cal .cell .n{font-family:var(--pixel);font-size:14px;display:inline-block;min-width:24px;text-align:center}
+.cal .cell.today .n{background:var(--yellow);border:2px solid var(--line)}
+.cal .cell.photo .n{background:rgba(255,255,255,.88);border:2px solid var(--line)}
+.cal .cell.photo::before{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(255,255,255,.75));pointer-events:none}
+.cal .ev{position:relative;font-size:11.5px;line-height:1.35;padding:0 4px;margin-top:2px;border-left:4px solid var(--blue2);background:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal .ev.ddl{border-left-color:var(--red)}
+.cal .ev.cl{border-left-color:var(--line)}
+.week7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.week7 .day{border:3px solid var(--line);background:var(--paper);min-height:300px;cursor:pointer}
+.week7 .day.today{box-shadow:4px 4px 0 var(--yellow)}
+.week7 .dh{font-family:var(--pixel);text-align:center;border-bottom:3px solid var(--line);padding:5px;background:var(--soft)}
+.week7 .day.today .dh{background:var(--yellow)}
+.week7 .dp{height:70px;background:center/cover;border-bottom:2px solid var(--line)}
+.week7 .it{font-size:12px;margin:5px;padding:3px 5px;border:2px solid var(--line);line-height:1.3;word-break:break-word}
+.week7 .it small{display:block;color:var(--muted);font-family:var(--pixel)}
+.navrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.navrow .ttl{font-family:var(--pixel);font-size:18px;min-width:120px;text-align:center}
+
+/* ---------- habits ---------- */
+.habits{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.hcard .hh{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.hcard .hi{font-size:26px;width:44px;height:44px;border:3px solid var(--line);display:grid;place-items:center;background:var(--soft2);flex:0 0 44px}
+.hcard .hn{flex:1;min-width:0}
+.hcard .hn b{font-family:var(--pixel);font-weight:400;font-size:17px;display:block;word-break:break-word}
+.hstats{display:flex;gap:8px;margin:8px 0}
+.hstats>div{flex:1;border:2px solid var(--line);text-align:center;padding:2px;background:var(--soft2)}
+.hstats b{font-family:var(--pixel);font-weight:400;font-size:18px;display:block;line-height:1.2}
+.hstats small{font-size:11px;color:var(--muted)}
+.hgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.hgrid.w12{grid-template-columns:repeat(6,1fr)}
+.hgrid.m12{grid-template-columns:repeat(6,1fr)}
+.hgrid .wdh{font-family:var(--pixel);font-size:11px;text-align:center;color:var(--muted)}
+.hc{aspect-ratio:1;border:2px solid var(--line);background:var(--paper);cursor:pointer;font-family:var(--pixel);font-size:11px;display:grid;place-items:center;padding:0;line-height:1.1}
+.hgrid.w12 .hc,.hgrid.m12 .hc{aspect-ratio:auto;padding:6px 0}
+.hc:hover{background:var(--soft)}
+.hc.on{background:var(--green)}
+.hc.today{outline:3px solid var(--yellow);outline-offset:-1px}
+.hc.off{background:repeating-linear-gradient(45deg,#f2f5f8 0 3px,#e2e8ee 3px 6px);color:#aab7c4;cursor:default}
+.hc.off.on{background:var(--green);color:var(--ink)}
+.hc.fut{opacity:.35;cursor:default}
+.hc.blank{border:0;background:none;cursor:default}
+.hcard.arch{background:var(--soft2)}
+.hcard.arch .hi{filter:grayscale(.3)}
+.medal{font-family:var(--pixel);font-size:12px;background:var(--yellow);border:2px solid var(--line);padding:0 6px}
+.icons{display:flex;flex-wrap:wrap;gap:6px}
+.icons button{font-size:20px;width:38px;height:38px;border:2px solid var(--line);background:var(--paper);cursor:pointer}
+.icons button.on{background:var(--yellow)}
+.days7{display:flex;gap:4px;flex-wrap:wrap}
+.days7 label{border:2px solid var(--line);padding:2px 8px;cursor:pointer;font-family:var(--pixel)}
+.days7 input{display:none}
+.days7 label:has(input:checked){background:var(--blue)}
+
+/* ---------- money ---------- */
+.catbars .cb{display:grid;grid-template-columns:80px 1fr 80px;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+.catbars .cb .bar{height:16px}
+.catbars .cb span:last-child{text-align:right;font-family:var(--pixel)}
+.mday{margin-top:12px}
+.mday h4{font-size:13px;display:flex;justify-content:space-between;border-bottom:2px solid var(--line);padding-bottom:3px;margin-bottom:4px}
+.mrow{display:flex;gap:10px;align-items:center;padding:5px 2px;border-bottom:1px dashed var(--soft)}
+.mrow .c{width:26px;text-align:center}
+.mrow .d{flex:1;min-width:0}
+.mrow .a{font-family:var(--pixel)}
+.mrow .a.out{color:#c2415a}
+.mrow .a.in{color:#2c8a45}
+
+/* ---------- notes ---------- */
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.note{border:3px solid var(--line);box-shadow:4px 4px 0 var(--shadow);display:flex;flex-direction:column;min-height:180px;position:relative}
+.note textarea{flex:1;border:0;background:transparent;padding:10px 12px;font-size:14px;min-height:130px;resize:none;box-shadow:none!important}
+.note .nf{display:flex;align-items:center;gap:4px;padding:4px 6px;border-top:2px dashed rgba(32,54,80,.3)}
+.note .nf .sp{flex:1}
+.note .cdot{width:16px;height:16px;border:2px solid var(--line);cursor:pointer;padding:0}
+.note.pinned::before{content:"📌";position:absolute;top:-14px;right:10px;font-size:20px}
+.note .ts{font-size:11px;color:var(--muted);font-family:var(--pixel)}
+
+/* ---------- review ---------- */
+.rcal .cell{min-height:120px}
+.rcal .note-snip{position:absolute;left:4px;right:4px;bottom:4px;font-size:11.5px;background:rgba(255,255,255,.9);padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid var(--line)}
+.rv-photo{width:100%;aspect-ratio:4/3;border:3px solid var(--line);background:var(--soft2) center/contain no-repeat;display:grid;place-items:center;font-family:var(--pixel);color:var(--muted);margin-bottom:10px}
+.filebtn{display:inline-block}
+.filebtn input{display:none}
+
+/* ---------- modal & toast ---------- */
+#modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px}
+#modal[hidden]{display:none}
+.modal-bg{position:absolute;inset:0;background:rgba(32,54,80,.45)}
+.modal{position:relative;width:min(520px,100%);max-height:calc(100vh - 32px);overflow-y:auto;box-shadow:8px 8px 0 var(--line)}
+.modal-h{display:flex;align-items:center;margin:-14px -16px 14px;padding:10px 16px;background:var(--blue);border-bottom:3px solid var(--line)}
+.modal-h h3{flex:1;font-size:17px}
+.modal .x{border:2px solid var(--line);background:var(--paper);cursor:pointer;width:28px;height:28px;font-family:var(--pixel)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.modal-actions .sp{flex:1}
+#toasts{position:fixed;top:70px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{font-family:var(--pixel);background:var(--yellow);border:3px solid var(--line);box-shadow:3px 3px 0 var(--line);padding:6px 12px;animation:pop 1.8s steps(6) forwards}
+.toast.lvup{background:var(--pink);font-size:18px}
+.toast.info{background:var(--paper)}
+@keyframes pop{0%{opacity:0;transform:translateY(10px)}12%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.scrim{display:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .dash{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .span3{grid-column:1/-1}
+}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;left:0;top:0;bottom:0;width:230px;transform:translateX(-105%);transition:transform .2s steps(4)}
+  .side.open{transform:none}
+  .scrim.open{display:block;position:fixed;inset:0;background:rgba(32,54,80,.35);z-index:25}
+  .burger{display:inline-block}
+  .top{padding:10px 14px;gap:10px;flex-wrap:wrap}
+  .lv .bar{width:70px}
+  .lv .exp{display:none}
+  .page{padding:16px 14px 70px}
+  .dash{grid-template-columns:1fr}
+  .span2,.span3{grid-column:auto}
+  .two{grid-template-columns:1fr}
+  .cols4{grid-template-columns:1fr 1fr}
+  .quadwrap{grid-template-columns:20px 1fr 1fr;gap:6px}
+  .zone{padding:6px;min-height:110px}
+  .task{padding:6px;gap:6px}
+  .task.done::after{display:none}
+  .cal .cell{min-height:64px;padding:2px}
+  .cal .ev{font-size:10px;padding:0 2px;border-left-width:3px}
+  .week7{grid-template-columns:1fr}
+  .week7 .day{min-height:0}
+  .catbars .cb{grid-template-columns:64px 1fr 64px}
+}
+@media (max-width:480px){
+  .cols4{grid-template-columns:1fr}
+  .quadwrap .zone .task .meta{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand"><span id="logo"></span><div><b>像素冒險手帳</b><small>PIXEL QUEST DESK</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+  <div class="scrim" id="scrim" data-act="closeSide"></div>
+  <div class="main">
+    <header class="top">
+      <button class="btn sm w burger" data-act="openSide">☰</button>
+      <span class="date" id="topDate"></span>
+      <span class="wk" id="topWeek"></span>
+      <span class="sp"></span>
+      <div class="lv" id="topLv"></div>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+<div id="modal" hidden></div>
+<div id="toasts"></div>
+<input type="file" id="hiddenFile" accept="image/*" hidden>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<script>
+/* =========================================================
+   像素冒險手帳 Pixel Quest Desk — v1
+   ========================================================= */
+
+/* ---------- helpers ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const P = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const TODAY = () => ymd(new Date());
+const addDays = (s, n) => { const d = P(s); d.setDate(d.getDate() + n); return ymd(d); };
+const diffDays = (a, b) => Math.round((P(b) - P(a)) / 86400000);
+const mondayOf = s => { const d = P(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return ymd(d); };
+const wdOf = s => P(s).getDay();             // 0 = Sun
+const WD = ['日', '一', '二', '三', '四', '五', '六'];
+const md = s => { const d = P(s); return `${d.getMonth() + 1}/${d.getDate()}`; };
+const mdw = s => `${md(s)}（${WD[wdOf(s)]}）`;
+const thisYM = () => TODAY().slice(0, 7);
+const ymShift = (ym, n) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + n, 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+const ymLabel = ym => { const [y, m] = ym.split('-'); return `${y} 年 ${+m} 月`; };
+const money = n => (n < 0 ? '-' : '') + '$' + Math.abs(Math.round(n)).toLocaleString();
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function monthCells(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const last = `${ym}-${pad(new Date(y, m, 0).getDate())}`;
+  let d = mondayOf(`${ym}-01`); const cells = [];
+  while (true) { cells.push({ date: d, in: d.slice(0, 7) === ym }); d = addDays(d, 1); if (d > last && cells.length % 7 === 0) break; }
+  return cells;
+}
+
+/* ---------- constants ---------- */
+const QUAD = { q1: '緊急且重要', q2: '重要不緊急', q3: '緊急不重要', q4: '不緊急不重要' };
+const QSHORT = { q1: '急・重', q2: '重要', q3: '緊急', q4: '可緩' };
+const HZ = { any: '隨時可完成', week: '一週內', month: '一個月內', year: '一年內' };
+const HZSHORT = { any: '隨時', week: '週計劃', month: '月計劃', year: '年目標' };
+const OUT_CATS = { 餐飲: '🍙', 交通: '🚌', 購物: '🛍️', 娛樂: '🎮', 學習: '📚', 生活: '🧺', 其他: '📦' };
+const IN_CATS = { 零用錢: '👛', 打工: '💼', 獎學金: '🏅', 其他收入: '✨' };
+const COLORS = ['#9ad3f7', '#ffd866', '#ff9fb2', '#86d595', '#c7a8f5', '#ffb36b', '#7fd8d0', '#d9dee4'];
+const NOTE_COLORS = ['#fff6b8', '#d6edfc', '#ffdbe3', '#dcf5df', '#ece0fc', '#ffffff'];
+const H_ICONS = ['💧', '🏃', '📖', '🧘', '🥗', '😴', '🎸', '✍️', '🧹', '💊', '🌱', '⭐', '🐱', '🎨', '🦷', '📵'];
+const FREQ = { daily: '每日', weekly: '每週', monthly: '每月', custom: '自訂' };
+const EXP = { main: 30, quest: 15, task: 10, habit: 5 };
+const NAV = [
+  ['dash', '🏠', '儀表板'], ['tasks', '📜', '待辦清單'], ['courses', '🎓', '課程管理'], ['cal', '📅', '行事曆'],
+  ['habits', '🌱', '習慣打卡'], ['money', '💰', '記帳'], ['notes', '📝', '筆記'], ['review', '📷', '每日回顧'], ['settings', '⚙️', '設定']
+];
+
+/* ---------- pixel mascot ---------- */
+function slime(scale = 3, mood = 'happy') {
+  const rows = [
+    '.....XXXX.....',
+    '...XXBBBBXX...',
+    '..XBBBWWBBBX..',
+    '.XBBBBBWBBBBX.',
+    '.XBBKBBBBKBBX.',
+    'XBBBKBBBBKBBBX',
+    'XBPPBBMMBBPPBX',
+    'XBBBBBBBBBBBBX',
+    '.XXXXXXXXXXXX.'];
+  if (mood === 'sleep') { rows[4] = '.XBBBBBBBBBBX.'; rows[5] = 'XBBKKBBBBKKBBX'; }
+  const col = { X: '#203650', B: '#9ad3f7', W: '#ffffff', K: '#203650', P: '#ff9fb2', M: '#203650' };
+  let r = '';
+  rows.forEach((row, y) => [...row].forEach((c, x) => { if (c !== '.') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${col[c]}"/>`; }));
+  return `<svg width="${14 * scale}" height="${9 * scale}" viewBox="0 0 14 9" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+
+/* ---------- state ---------- */
+const KEY = 'pixel-quest-desk-v1';
+const DEFAULT = () => ({
+  tasks: [], courses: [], events: [], habits: [], money: [], notes: [], reviews: {},
+  daily: {}, exp: 0, seeded: false, sampleNotice: false,
+  settings: { semStart: '2026-09-07', budget: 8000, taskView: 'quad', hideDone: false, calView: 'month' }
+});
+let S;
+function load() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(KEY)); } catch (e) { }
+  S = Object.assign(DEFAULT(), raw || {});
+  S.settings = Object.assign(DEFAULT().settings, S.settings || {});
+  if (!raw) seed();
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('⚠ 儲存失敗，瀏覽器空間可能不足', 'info'); }
+}
+const UI = { calYM: thisYM(), calWeek: mondayOf(TODAY()), revYM: thisYM(), monYM: thisYM(), course: null, hMonth: {} };
+
+/* ---------- photos (IndexedDB) ---------- */
+const PHOTOS = {};
+const DB = {
+  db: null,
+  open() {
+    return new Promise(res => {
+      try {
+        const rq = indexedDB.open('pixel-quest-desk', 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore('photos');
+        rq.onsuccess = () => { this.db = rq.result; res(); };
+        rq.onerror = () => res();
+      } catch (e) { res(); }
+    });
+  },
+  tx(mode) { return this.db.transaction('photos', mode).objectStore('photos'); },
+  put(k, v) { return new Promise((res, rej) => { if (!this.db) return rej(); const r = this.tx('readwrite').put(v, k); r.onsuccess = res; r.onerror = rej; }); },
+  del(k) { return new Promise(res => { if (!this.db) return res(); const r = this.tx('readwrite').delete(k); r.onsuccess = res; r.onerror = res; }); },
+  clear() { return new Promise(res => { if (!this.db) return res(); const r = this.tx('readwrite').clear(); r.onsuccess = res; r.onerror = res; }); },
+  all() {
+    return new Promise(res => {
+      const out = {}; if (!this.db) return res(out);
+      const r = this.tx('readonly').openCursor();
+      r.onsuccess = () => { const c = r.result; if (c) { out[c.key] = c.value; c.continue(); } else res(out); };
+      r.onerror = () => res(out);
+    });
+  }
+};
+async function loadPhotos() {
+  const all = await DB.all();
+  for (const k in all) PHOTOS[k] = URL.createObjectURL(all[k]);
+}
+function compress(file) {
+  return new Promise((res, rej) => {
+    const img = new Image(); const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const M = 1000, s = Math.min(1, M / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? res(b) : rej(), 'image/jpeg', 0.8);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(); };
+    img.src = url;
+  });
+}
+async function setPhoto(date, file) {
+  try {
+    const blob = await compress(file);
+    await DB.put(date, blob);
+    if (PHOTOS[date]) URL.revokeObjectURL(PHOTOS[date]);
+    PHOTOS[date] = URL.createObjectURL(blob);
+    S.reviews[date] = Object.assign({ note: '' }, S.reviews[date], { photo: true });
+    save(); toast('📷 照片已貼上', 'info'); return true;
+  } catch (e) { toast('⚠ 這張照片讀不進來，換一張試試', 'info'); return false; }
+}
+
+/* ---------- references (tasks + course homework) ---------- */
+function refOf(ref) {
+  if (ref.startsWith('t:')) {
+    const t = S.tasks.find(x => x.id === ref.slice(2));
+    return t && { ref, title: t.title, ddl: t.ddl, done: t.done, obj: t, kind: 'task' };
+  }
+  const [, cid, hid] = ref.split(':');
+  const c = S.courses.find(x => x.id === cid); const h = c && c.hw.find(x => x.id === hid);
+  return h && { ref, title: h.title, ddl: h.ddl, done: h.done, obj: h, kind: 'hw', course: c };
+}
+const allRefs = () => [...S.tasks.map(t => 't:' + t.id), ...S.courses.flatMap(c => c.hw.map(h => `h:${c.id}:${h.id}`))];
+const QR = { q1: 0, q3: 1, q2: 2, q4: 3 }, HR = { week: 0, month: 1, any: 2, year: 3 };
+function rankKey(r) {
+  const o = r.obj;
+  const q = r.kind === 'hw' ? 2 : (o.quad ? QR[o.quad] : 4);
+  const h = r.kind === 'hw' ? 4 : (o.hz ? HR[o.hz] : 4);
+  return [r.ddl ? diffDays(TODAY(), r.ddl) : 99999, q, h];
+}
+const cmpRank = (a, b) => { const x = rankKey(a), y = rankKey(b); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
+
+/* ---------- daily main quest + side quests ---------- */
+function ensureDaily() {
+  const td = TODAY();
+  let D = S.daily;
+  if (D.date !== td) D = S.daily = { date: td, main: [], quests: [], rerolled: false, picked: false };
+  D.main = D.main.filter(r => refOf(r));
+  D.quests = D.quests.filter(r => refOf(r));
+  const open = allRefs().map(refOf).filter(r => !r.done);
+  // 1) every DDL today / overdue is a main quest
+  open.filter(r => r.ddl && r.ddl <= td).sort((a, b) => a.ddl.localeCompare(b.ddl))
+    .forEach(r => { if (!D.main.includes(r.ref)) D.main.push(r.ref); });
+  // 2) otherwise pick the single most pressing classified item
+  if (!D.main.length && !D.picked) {
+    const c = open.filter(r => r.ddl || (r.kind === 'task' && (r.obj.quad || r.obj.hz))).sort(cmpRank)[0];
+    if (c) { D.main.push(c.ref); D.picked = true; }
+  }
+  D.quests = D.quests.filter(r => !D.main.includes(r));
+  // 3) side quests: random unclassified chores
+  const n = Math.max(2, 4 - Math.max(0, D.main.length - 1));
+  while (D.quests.length > n) {
+    const i = D.quests.map(refOf).findLastIndex(r => !r.done);
+    if (i < 0) break; D.quests.splice(i, 1);
+  }
+  if (D.quests.length < n) questPool(D).slice(0, n - D.quests.length).forEach(r => D.quests.push(r));
+}
+function questPool(D, exclude = []) {
+  const taken = new Set([...D.main, ...D.quests, ...exclude]);
+  const free = S.tasks.filter(t => !t.done && !taken.has('t:' + t.id));
+  const a = shuffle(free.filter(t => !t.quad && !t.hz).map(t => 't:' + t.id));
+  const b = shuffle(free.filter(t => !t.quad && t.hz === 'any').map(t => 't:' + t.id));
+  return [...a, ...b];
+}
+
+/* ---------- exp ---------- */
+const level = () => Math.floor(S.exp / 100) + 1;
+function gainExp(n) {
+  const before = level();
+  S.exp = Math.max(0, S.exp + n);
+  if (n > 0) toast(`+${n} EXP`);
+  if (level() > before) setTimeout(() => toast(`★ LEVEL UP! Lv.${level()} ★`, 'lvup'), 350);
+}
+function toggleRef(ref) {
+  const r = refOf(ref); if (!r) return;
+  const o = r.obj; o.done = !o.done;
+  if (o.done) {
+    const D = S.daily;
+    const g = D.main.includes(ref) ? EXP.main : D.quests.includes(ref) ? EXP.quest : EXP.task;
+    o.doneAt = TODAY(); o.exp = g; gainExp(g);
+  } else { gainExp(-(o.exp || 0)); o.exp = 0; o.doneAt = null; }
+  commit();
+}
+
+/* ---------- toast ---------- */
+function toast(msg, cls = '') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + cls; t.textContent = msg;
+  $('#toasts').appendChild(t); setTimeout(() => t.remove(), 1900);
+}
+
+/* ---------- modal ---------- */
+function openModal(title, body) {
+  const m = $('#modal');
+  m.innerHTML = `<div class="modal-bg" data-act="closeModal"></div>
+    <div class="modal card" role="dialog" aria-modal="true"><div class="modal-h"><h3>${title}</h3><button class="x" data-act="closeModal" aria-label="關閉">✕</button></div>${body}</div>`;
+  m.hidden = false;
+  setTimeout(() => { const f = m.querySelector('input[type=text],textarea'); if (f && matchMedia('(min-width:821px)').matches) f.focus(); }, 30);
+}
+function closeModal() { const m = $('#modal'); m.hidden = true; m.innerHTML = ''; }
+
+/* ---------- small renderers ---------- */
+function ddlChip(ddl, done) {
+  if (!ddl) return '';
+  if (done) return `<span class="chip">${md(ddl)}</span>`;
+  const n = diffDays(TODAY(), ddl);
+  const txt = n < 0 ? `逾期 ${-n} 天` : n === 0 ? '今天到期' : n === 1 ? '明天' : `D-${n}`;
+  const cls = n <= 0 ? 'hot' : n <= 3 ? 'warm' : '';
+  return `<span class="chip ${cls}" title="${ddl}">${txt}</span>`;
+}
+function taskItem(t, opt = {}) {
+  const ref = 't:' + t.id;
+  const tags = [];
+  if (opt.showQuad && t.quad) tags.push(`<span class="chip">${QSHORT[t.quad]}</span>`);
+  if (opt.showHz && t.hz) tags.push(`<span class="chip">${HZSHORT[t.hz]}</span>`);
+  if (S.daily.main.includes(ref)) tags.push('<span class="chip y">★主線</span>');
+  else if (S.daily.quests.includes(ref)) tags.push('<span class="chip y">◆委託</span>');
+  return `<div class="task ${t.done ? 'done' : ''}" draggable="true" data-drag="${t.id}">
+    <button class="chk" data-act="toggle" data-ref="${ref}" aria-label="完成"></button>
+    <div class="tt"><div class="name">${esc(t.title)}</div>
+      ${(t.ddl || tags.length) ? `<div class="meta">${ddlChip(t.ddl, t.done)}${tags.join('')}</div>` : ''}</div>
+    <button class="iconbtn" data-act="editTask" data-id="${t.id}" aria-label="編輯">⋯</button></div>`;
+}
+const courseOn = jsDay => S.courses.flatMap(c => c.slots.filter(s => (s.day % 7) === jsDay).map(s => ({ c, s })))
+  .sort((a, b) => a.s.start.localeCompare(b.s.start));
+const semWeek = (date = TODAY()) => Math.floor(diffDays(S.settings.semStart, date) / 7) + 1;
+function ddlsOn(date) {
+  return allRefs().map(refOf).filter(r => r.ddl === date);
+}
+function eventsOn(date) { return S.events.filter(e => e.date === date).sort((a, b) => (a.time || '99').localeCompare(b.time || '99')); }
+
+/* ===================================================================
+   PAGES
+   =================================================================== */
+const PAGES = {};
+
+/* ---------- dashboard ---------- */
+PAGES.dash = () => {
+  const td = TODAY(), D = S.daily, jsd = wdOf(td);
+  const h = new Date().getHours();
+  const hi = h < 5 ? '夜深了' : h < 11 ? '早安' : h < 14 ? '午安' : h < 18 ? '午後好' : '晚安';
+  const classes = courseOn(jsd), evs = eventsOn(td);
+  const mains = D.main.map(refOf), quests = D.quests.map(refOf);
+  const all = [...mains, ...quests], doneN = all.filter(r => r.done).length;
+  const dueSoon = allRefs().map(refOf).filter(r => !r.done && r.ddl).sort((a, b) => a.ddl.localeCompare(b.ddl)).slice(0, 5);
+  const todayDue = dueSoon.filter(r => r.ddl <= td).length;
+
+  const qrow = (r, main) => `<div class="qitem ${main ? 'main' : ''} ${r.done ? 'done' : ''}">
+      <button class="chk ${r.done ? 'on' : ''}" data-act="toggle" data-ref="${r.ref}" aria-label="完成"></button>
+      <span class="ico">${main ? '★' : '◆'}</span>
+      <div class="tt">${esc(r.title)} ${r.course ? `<span class="chip">${esc(r.course.name)}</span>` : ''} ${ddlChip(r.ddl, r.done)}</div>
+      <span class="xp">${r.done ? 'CLEAR' : '+' + (main ? EXP.main : EXP.quest)}</span></div>`;
+
+  // schedule
+  const sched = [
+    ...classes.map(({ c, s }) => ({ t: `${s.start}–${s.end}`, k: s.start, title: c.name, sub: c.room, color: c.color })),
+    ...evs.map(e => ({ t: e.time || '全天', k: e.time || '00:00', title: e.title, sub: '', color: e.color }))
+  ].sort((a, b) => a.k.localeCompare(b.k));
+
+  // plans
+  const plan = k => { const l = S.tasks.filter(t => t.hz === k); return [l.filter(t => t.done).length, l.length]; };
+  const daysLeftW = 7 - ((jsd + 6) % 7);
+  const [Y, M] = td.split('-').map(Number), dim = new Date(Y, M, 0).getDate();
+
+  // habits
+  const hab = S.habits.filter(x => !x.archived && habitDueToday(x));
+  // money
+  const mm = monthMoney(thisYM());
+  const pins = [...S.notes].sort((a, b) => (b.pinned - a.pinned) || (b.updatedAt - a.updatedAt)).slice(0, 3);
+  const rv = S.reviews[td];
+
+  return `
+  ${S.sampleNotice ? `<div class="notice">${slime(3)}<p>目前顯示的是<b>範例資料</b>，讓你先看看各功能長什麼樣子。準備好開始用了，就到「設定」清除範例資料。</p>
+    <button class="btn sm w" data-act="hideNotice">知道了</button><button class="btn sm pk" data-act="go" data-page="settings">去清除</button></div>` : ''}
+  <div class="hello">${slime(4, h < 5 || h >= 23 ? 'sleep' : 'happy')}
+    <div><h2>${hi}！今天是 ${mdw(td)}</h2>
+    <p class="muted">今天有 <b>${classes.length}</b> 堂課、<b>${evs.length}</b> 個行程、<b>${todayDue}</b> 個今天到期，主線 <b>${mains.length}</b> 件、委託 <b>${quests.length}</b> 件。一件一件來就好。</p></div></div>
+  <div class="dash">
+    <section class="card span2 quest">
+      <div class="card-h"><h3>⚔ 今日任務</h3>
+        <button class="btn sm ${D.rerolled ? '' : 'y'}" data-act="reroll" ${D.rerolled || !quests.some(r => !r.done) ? 'disabled' : ''}>🎲 重抽委託 ${D.rerolled ? '(0)' : '(1)'}</button></div>
+      <div class="qsec">★ 今日主線 · 今天一定要完成</div>
+      ${mains.length ? mains.map(r => qrow(r, true)).join('') : '<div class="empty">今天沒有主線，是自由冒險日 ✨</div>'}
+      <div class="qsec">◆ 今日委託 · 隨手解決的小事</div>
+      ${quests.length ? quests.map(r => qrow(r, false)).join('') : '<div class="empty">委託板空空的，到待辦清單丟幾件「未分類」小事進來吧</div>'}
+      ${all.length ? `<div class="qprog">今日進度 <div class="bar g stripes"><i style="width:${doneN / all.length * 100}%"></i></div> ${doneN}/${all.length}</div>` : ''}
+      ${all.length && doneN === all.length ? '<div class="allclear">🎉 今日任務全部完成！今天很棒！</div>' : ''}
+    </section>
+
+    <section class="card" data-go="cal">
+      <div class="card-h"><h3>🗓 今日行程</h3><span class="more">行事曆 ›</span></div>
+      ${sched.length ? `<ul class="sched">${sched.map(x => `<li><span class="t">${x.t}</span><span class="dot" style="background:${x.color}"></span><span>${esc(x.title)} ${x.sub ? `<span class="muted small">@${esc(x.sub)}</span>` : ''}</span></li>`).join('')}</ul>`
+      : '<div class="empty">今天沒有課也沒有行程</div>'}
+    </section>
+
+    <section class="card" data-go="tasks">
+      <div class="card-h"><h3>⏰ DDL 倒數</h3><span class="more">待辦 ›</span></div>
+      ${dueSoon.length ? dueSoon.map(r => `<div class="kv"><span>${esc(r.title)} ${r.course ? `<span class="muted small">· ${esc(r.course.name)}</span>` : ''}</span>${ddlChip(r.ddl)}</div>`).join('') : '<div class="empty">沒有待處理的截止日 🎈</div>'}
+    </section>
+
+    <section class="card" data-go="tasks">
+      <div class="card-h"><h3>🧭 計劃進度</h3><span class="more">待辦 ›</span></div>
+      ${['week', 'month', 'year'].map(k => { const [d, t] = plan(k); return `<div class="kv"><span>${HZSHORT[k]}</span><b>${d}/${t}</b></div><div class="bar ${k === 'year' ? 'y' : ''}"><i style="width:${t ? d / t * 100 : 0}%"></i></div>`; }).join('')}
+      <p class="small muted" style="margin:10px 0 0">這週還剩 ${daysLeftW} 天 · 這個月還剩 ${dim - +td.slice(8) + 1} 天</p>
+    </section>
+
+    <section class="card" data-go="habits">
+      <div class="card-h"><h3>🌱 今日習慣</h3><span class="more">習慣 ›</span></div>
+      ${hab.length ? hab.map(x => { const k = habitKey(x, td); return `<div class="hab-mini"><button class="chk ${x.log[k] ? 'on' : ''}" data-act="habit" data-id="${x.id}" data-key="${k}"></button><span class="nm">${x.icon} ${esc(x.name)}</span><span class="chip">${FREQ[x.freq]}</span><span class="small muted">🔥${habitStreak(x)}</span></div>`; }).join('') : '<div class="empty">今天沒有要打卡的習慣</div>'}
+    </section>
+
+    <section class="card" data-go="money">
+      <div class="card-h"><h3>💰 本月記帳</h3><span class="more">記帳 ›</span></div>
+      <div class="stat3"><div><small>支出</small><b>${money(mm.out)}</b></div><div><small>收入</small><b>${money(mm.inc)}</b></div><div><small>結餘</small><b>${money(mm.inc - mm.out)}</b></div></div>
+      ${S.settings.budget > 0 ? `<div class="kv small" style="margin-top:10px"><span>預算 ${money(S.settings.budget)}</span><span>剩 ${money(S.settings.budget - mm.out)}</span></div>
+      <div class="bar ${mm.out > S.settings.budget ? 'r' : mm.out > S.settings.budget * .8 ? 'y' : 'g'}"><i style="width:${Math.min(100, mm.out / S.settings.budget * 100)}%"></i></div>` : ''}
+    </section>
+
+    <section class="card" data-go="notes">
+      <div class="card-h"><h3>📝 快速筆記</h3><span class="more">筆記 ›</span></div>
+      <div class="row"><input type="text" id="qnote" class="grow" placeholder="想到什麼先記下來…" data-enter="quickNote"><button class="btn sm" data-act="quickNote">記</button></div>
+      ${pins.length ? `<ul class="pinlist">${pins.map(n => `<li style="background:${n.color}">${n.pinned ? '📌 ' : ''}${esc(n.text)}</li>`).join('')}</ul>` : ''}
+    </section>
+
+    <section class="card">
+      <div class="card-h" data-go="review"><h3>📷 今日回顧</h3><span class="more">回顧 ›</span></div>
+      <div class="review-thumb" data-act="openReview" data-date="${td}" style="${PHOTOS[td] ? `background-image:url(${PHOTOS[td]})` : ''}">${PHOTOS[td] ? '' : '＋ 上傳今天的一張照片'}</div>
+      <p class="small" style="margin:8px 0 0">${rv && rv.note ? esc(rv.note) : '<span class="muted">一張照片＋一句話，就是今天的紀錄。</span>'}</p>
+    </section>
+  </div>`;
+};
+
+/* ---------- tasks ---------- */
+PAGES.tasks = () => {
+  const v = S.settings.taskView, hide = S.settings.hideDone;
+  const list = S.tasks.filter(t => !(hide && t.done)).sort((a, b) => (a.done - b.done) || cmpRank(refOf('t:' + a.id), refOf('t:' + b.id)));
+  const total = S.tasks.length, doneN = S.tasks.filter(t => t.done).length;
+  const zone = (field, key, title, cls = '') => {
+    const items = list.filter(t => (t[field] || null) === (key === 'none' ? null : key));
+    return `<div class="zone ${cls}" data-zone="${field}:${key}"><h4><span>${title}</span><span class="chip">${items.filter(t => !t.done).length}</span></h4>
+      <div class="tasks">${items.map(t => taskItem(t, { showQuad: field === 'hz', showHz: field === 'quad' })).join('') || '<div class="empty">把卡片拖到這裡</div>'}</div></div>`;
+  };
+  const field = v === 'quad' ? 'quad' : 'hz';
+  return `
+  <div class="page-h"><h2>待辦清單</h2><span class="muted px small">已完成 ${doneN} / ${total}</span><span class="sp"></span></div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="addbar" style="margin:0">
+      <input type="text" id="tTitle" placeholder="新增待辦，小事也可以（例如：洗衣服、換電池）" data-enter="addTask">
+      <input type="date" id="tDdl" title="DDL（可不填）">
+      <select id="tQuad"><option value="">四象限：未分類</option>${Object.entries(QUAD).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
+      <select id="tHz"><option value="">時間：未分類</option>${Object.entries(HZ).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
+      <button class="btn y" data-act="addTask">＋ 新增</button>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="seg"><button class="${v === 'quad' ? 'on' : ''}" data-act="taskView" data-v="quad">四象限</button><button class="${v === 'hz' ? 'on' : ''}" data-act="taskView" data-v="hz">時間欄位</button></div>
+    <label><input type="checkbox" data-change="hideDone" ${hide ? 'checked' : ''}> 隱藏已完成</label>
+    <span class="muted small">💡 拖曳卡片即可分類；手機上點「⋯」分類</span>
+  </div>
+  ${v === 'quad' ? `
+  <div class="quadwrap">
+    <span></span><div class="axis">⚡ 緊急</div><div class="axis">🐢 不緊急</div>
+    <div class="axis v">重要</div>${zone('quad', 'q1', '🔥 緊急且重要', 'q1')}${zone('quad', 'q2', '🌟 重要不緊急', 'q2')}
+    <div class="axis v">不重要</div>${zone('quad', 'q3', '📣 緊急不重要', 'q3')}${zone('quad', 'q4', '☁ 不緊急不重要', 'q4')}
+  </div>` : `
+  <div class="cols4">${zone('hz', 'any', '🧺 隨時可完成')}${zone('hz', 'week', '📆 一週內（週計劃）')}${zone('hz', 'month', '🗓 一個月內（月計劃）')}${zone('hz', 'year', '🏔 一年內（年目標）')}</div>`}
+  ${zone(field, 'none', '📦 未分類的小事 · 會被抽成「今日委託」', 'none')}
+  `;
+};
+function taskModal(id) {
+  const t = S.tasks.find(x => x.id === id); if (!t) return;
+  openModal('編輯待辦', `
+    <label class="field"><span>事項</span><input type="text" id="eTitle" value="${esc(t.title)}"></label>
+    <label class="field"><span>DDL（可不填）</span><input type="date" id="eDdl" value="${t.ddl || ''}"></label>
+    <label class="field"><span>四象限</span><select id="eQuad"><option value="">未分類</option>${Object.entries(QUAD).map(([k, l]) => `<option value="${k}" ${t.quad === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label class="field"><span>時間欄位</span><select id="eHz"><option value="">未分類</option>${Object.entries(HZ).map(([k, l]) => `<option value="${k}" ${t.hz === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <div class="modal-actions"><button class="btn pk" data-act="delTask" data-id="${id}">刪除</button><span class="sp"></span><button class="btn w" data-act="closeModal">取消</button><button class="btn y" data-act="saveTask" data-id="${id}">儲存</button></div>`);
+}
+
+/* ---------- courses ---------- */
+PAGES.courses = () => {
+  const wk = semWeek();
+  if (!UI.course || !S.courses.find(c => c.id === UI.course)) UI.course = S.courses[0]?.id || null;
+  const c = S.courses.find(x => x.id === UI.course);
+  return `
+  <div class="page-h"><h2>課程管理</h2><span class="chip y">${wk >= 1 && wk <= 18 ? `學期第 ${wk} 週` : wk < 1 ? '學期還沒開始' : '學期已結束'}</span><span class="sp"></span>
+    <button class="btn y" data-act="courseModal">＋ 新增課程</button></div>
+  ${S.courses.length ? timetable() : `<div class="card empty">還沒有課程，按右上角「新增課程」輸入這學期的課吧！</div>`}
+  <div class="course-list">${S.courses.map(x => `<button class="cchip ${x.id === UI.course ? 'on' : ''}" data-act="pickCourse" data-id="${x.id}"><i style="background:${x.color}"></i>${esc(x.name)} <span class="chip">${x.hw.filter(h => !h.done).length}</span></button>`).join('')}</div>
+  ${c ? courseDetail(c, wk) : ''}`;
+};
+function timetable() {
+  const slots = S.courses.flatMap(c => c.slots.map(s => ({ c, s })));
+  const hasWeekend = slots.some(x => x.s.day >= 6);
+  const days = hasWeekend ? [1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4, 5];
+  const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  let lo = 8 * 60, hi = 17 * 60;
+  slots.forEach(({ s }) => { lo = Math.min(lo, Math.floor(toMin(s.start) / 60) * 60); hi = Math.max(hi, Math.ceil(toMin(s.end) / 60) * 60); });
+  const PX = 0.9, OFF = 10, H = (hi - lo) * PX + OFF * 2, todayD = wdOf(TODAY()) || 7;
+  let lines = ''; for (let m = lo; m <= hi; m += 60) lines += `<div class="tt-line" style="top:${(m - lo) * PX + OFF}px"></div>`;
+  let times = ''; for (let m = lo; m <= hi; m += 60) times += `<span style="top:${(m - lo) * PX + OFF}px">${pad(m / 60)}:00</span>`;
+  return `<div class="tt-grid" style="grid-template-columns:48px repeat(${days.length},minmax(90px,1fr))">
+    <div class="tt-head"></div>${days.map(d => `<div class="tt-head ${d === todayD ? 'today' : ''}">週${WD[d % 7]}</div>`).join('')}
+    <div class="tt-time" style="height:${H}px">${times}</div>
+    ${days.map(d => `<div class="tt-col" style="height:${H}px">${lines}${slots.filter(x => x.s.day === d).map(({ c, s }) =>
+      `<div class="tt-blk" data-act="pickCourse" data-id="${c.id}" style="top:${(toMin(s.start) - lo) * PX + OFF}px;height:${(toMin(s.end) - toMin(s.start)) * PX}px;background:${c.color}"><b>${esc(c.name)}</b>${s.start}–${s.end}${c.room ? `<br>${esc(c.room)}` : ''}</div>`).join('')}</div>`).join('')}
+  </div>`;
+}
+function courseDetail(c, wk) {
+  const hw = [...c.hw].sort((a, b) => (a.done - b.done) || (a.ddl || '9').localeCompare(b.ddl || '9'));
+  let weeks = '';
+  for (let i = 1; i <= 18; i++) {
+    const w = c.weeks[i] || {}; const st = addDays(S.settings.semStart, (i - 1) * 7);
+    weeks += `<div class="wk-row ${i === wk ? 'now' : ''} ${w.done ? 'done' : ''}" ${i === wk ? 'id="nowWeek"' : ''}>
+      <button class="chk ${w.done ? 'on' : ''}" data-act="weekDone" data-c="${c.id}" data-w="${i}"></button>
+      <span class="wl">W${i}<br><span class="muted">${md(st)}–${md(addDays(st, 6))}</span></span>
+      <input type="text" value="${esc(w.text || '')}" placeholder="這週要讀到哪？" data-change="weekText" data-c="${c.id}" data-w="${i}"></div>`;
+  }
+  return `<div class="card" style="border-top:10px solid ${c.color}">
+    <div class="card-h"><h3>${esc(c.name)}</h3><button class="btn sm w" data-act="courseModal" data-id="${c.id}">編輯課程</button></div>
+    <p class="small muted" style="margin:-4px 0 12px">${c.teacher ? '👤 ' + esc(c.teacher) + '　' : ''}${c.room ? '📍 ' + esc(c.room) + '　' : ''}${c.slots.map(s => `週${WD[s.day % 7]} ${s.start}–${s.end}`).join('、')}</p>
+    <div class="two">
+      <div><h4 style="margin-bottom:8px">📮 作業 / 考試</h4>
+        <div class="row" style="margin-bottom:10px"><input type="text" id="hwTitle" class="grow" placeholder="作業名稱" data-enter="addHw" data-c="${c.id}"><input type="date" id="hwDdl"><button class="btn sm y" data-act="addHw" data-c="${c.id}">＋</button></div>
+        ${hw.map(h => `<div class="task ${h.done ? 'done' : ''}"><button class="chk" data-act="toggle" data-ref="h:${c.id}:${h.id}"></button><div class="tt"><div class="name">${esc(h.title)}</div><div class="meta">${ddlChip(h.ddl, h.done)}</div></div><button class="iconbtn" data-act="delHw" data-c="${c.id}" data-id="${h.id}" aria-label="刪除">✕</button></div>`).join('') || '<div class="empty">目前沒有作業 🎉</div>'}
+      </div>
+      <div><h4 style="margin-bottom:8px">📚 每週進度</h4><div class="weeks" id="weeksBox">${weeks}</div></div>
+    </div></div>`;
+}
+function courseModal(id) {
+  const c = id ? S.courses.find(x => x.id === id) : { name: '', teacher: '', room: '', color: COLORS[S.courses.length % COLORS.length], slots: [{ day: 1, start: '09:10', end: '11:00' }] };
+  const slotRow = s => `<div class="slot-row"><select class="sDay">${[1, 2, 3, 4, 5, 6, 7].map(d => `<option value="${d}" ${s.day === d ? 'selected' : ''}>週${WD[d % 7]}</option>`).join('')}</select>
+    <input type="time" class="sStart" value="${s.start}"> – <input type="time" class="sEnd" value="${s.end}"><button class="iconbtn" data-act="rmSlot">✕</button></div>`;
+  UI.slotTpl = slotRow({ day: 1, start: '09:10', end: '11:00' });
+  openModal(id ? '編輯課程' : '新增課程', `
+    <label class="field"><span>課程名稱</span><input type="text" id="cName" value="${esc(c.name)}" placeholder="例如：生成式 AI 導論"></label>
+    <div class="row"><label class="field grow"><span>老師</span><input type="text" id="cTeacher" value="${esc(c.teacher)}"></label><label class="field grow"><span>教室</span><input type="text" id="cRoom" value="${esc(c.room)}"></label></div>
+    <div class="field"><span>顏色</span><div class="swatches" id="cColor">${COLORS.map(x => `<button class="sw ${x === c.color ? 'on' : ''}" style="background:${x}" data-act="pickSw" data-color="${x}"></button>`).join('')}</div></div>
+    <div class="field"><span>上課時間</span><div id="slots">${c.slots.map(slotRow).join('')}</div><div><button class="btn sm w" data-act="addSlot">＋ 加一個時段</button></div></div>
+    <div class="modal-actions">${id ? `<button class="btn pk" data-act="delCourse" data-id="${id}">刪除課程</button>` : ''}<span class="sp"></span><button class="btn w" data-act="closeModal">取消</button><button class="btn y" data-act="saveCourse" data-id="${id || ''}">儲存</button></div>`);
+}
+
+/* ---------- calendar ---------- */
+PAGES.cal = () => {
+  const v = S.settings.calView;
+  const head = v === 'month'
+    ? `<button class="btn sm w" data-act="calNav" data-n="-1">◀</button><span class="ttl">${ymLabel(UI.calYM)}</span><button class="btn sm w" data-act="calNav" data-n="1">▶</button>`
+    : `<button class="btn sm w" data-act="calNav" data-n="-1">◀</button><span class="ttl">${md(UI.calWeek)} – ${md(addDays(UI.calWeek, 6))}</span><button class="btn sm w" data-act="calNav" data-n="1">▶</button>`;
+  return `
+  <div class="page-h"><h2>行事曆</h2><span class="sp"></span>
+    <div class="seg"><button class="${v === 'month' ? 'on' : ''}" data-act="calView" data-v="month">月</button><button class="${v === 'week' ? 'on' : ''}" data-act="calView" data-v="week">週</button></div></div>
+  <div class="toolbar"><div class="navrow">${head}<button class="btn sm" data-act="calToday">今天</button></div><span class="sp"></span>
+    <button class="btn y" data-act="dayModal" data-date="${TODAY()}">＋ 新增行程</button></div>
+  ${v === 'month' ? calMonth() : calWeek()}
+  <p class="small muted">💡 點日期可以新增行程、看當天的 DDL 和每日回顧；有回顧照片的日子會把照片貼在格子上。</p>`;
+};
+function calMonth() {
+  const td = TODAY();
+  return `<div class="cal">${['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="wd">${w}</div>`).join('')}
+  ${monthCells(UI.calYM).map(({ date, in: inM }) => {
+    const items = [...eventsOn(date).map(e => `<div class="ev" style="border-left-color:${e.color}">${e.time ? e.time + ' ' : ''}${esc(e.title)}</div>`),
+      ...ddlsOn(date).map(r => `<div class="ev ddl">${r.done ? '✓' : '⏰'} ${esc(r.title)}</div>`)];
+    const ph = PHOTOS[date];
+    return `<div class="cell ${inM ? '' : 'out'} ${date === td ? 'today' : ''} ${ph ? 'photo' : ''}" data-act="dayModal" data-date="${date}" ${ph ? `style="background-image:url(${ph})"` : ''}>
+      <span class="n">${+date.slice(8)}</span>${items.slice(0, 3).join('')}${items.length > 3 ? `<div class="ev cl">+${items.length - 3}</div>` : ''}</div>`;
+  }).join('')}</div>`;
+}
+function calWeek() {
+  const td = TODAY();
+  return `<div class="week7">${[0, 1, 2, 3, 4, 5, 6].map(i => {
+    const d = addDays(UI.calWeek, i);
+    const its = [
+      ...courseOn(wdOf(d)).map(({ c, s }) => ({ k: s.start, h: `<div class="it" style="background:${c.color}"><small>${s.start}–${s.end}</small>${esc(c.name)}</div>` })),
+      ...eventsOn(d).map(e => ({ k: e.time || '00:00', h: `<div class="it" style="border-left:6px solid ${e.color}"><small>${e.time || '全天'}</small>${esc(e.title)}</div>` })),
+      ...ddlsOn(d).map(r => ({ k: '99', h: `<div class="it" style="border-color:var(--red)"><small>${r.done ? '✓ 完成' : '⏰ DDL'}</small>${esc(r.title)}</div>` }))
+    ].sort((a, b) => a.k.localeCompare(b.k));
+    return `<div class="day ${d === td ? 'today' : ''}" data-act="dayModal" data-date="${d}"><div class="dh">${mdw(d)}</div>
+      ${PHOTOS[d] ? `<div class="dp" style="background-image:url(${PHOTOS[d]})"></div>` : ''}${its.map(x => x.h).join('') || '<div class="empty">—</div>'}</div>`;
+  }).join('')}</div>`;
+}
+function dayModal(date) {
+  const cls = courseOn(wdOf(date)), evs = eventsOn(date), dd = ddlsOn(date), rv = S.reviews[date];
+  openModal(`📅 ${date.slice(0, 4)} 年 ${mdw(date)}`, `
+    ${cls.length ? `<h4 style="margin-bottom:6px">🎓 課程</h4><ul class="sched">${cls.map(({ c, s }) => `<li><span class="t">${s.start}–${s.end}</span><span class="dot" style="background:${c.color}"></span>${esc(c.name)}</li>`).join('')}</ul><div class="hr"></div>` : ''}
+    <h4 style="margin-bottom:6px">🗓 行程</h4>
+    ${evs.map(e => `<div class="task"><span class="dot" style="width:12px;height:12px;border:2px solid var(--line);background:${e.color}"></span><div class="tt"><b class="px small">${e.time || '全天'}</b> ${esc(e.title)}</div><button class="iconbtn" data-act="delEvent" data-id="${e.id}" data-date="${date}">✕</button></div>`).join('') || '<div class="empty">這天還沒有行程</div>'}
+    <div class="row" style="margin-top:6px"><input type="time" id="evTime"><input type="text" id="evTitle" class="grow" placeholder="新增行程" data-enter="addEvent" data-date="${date}"></div>
+    <div class="row" style="margin-top:8px"><div class="swatches" id="evColor">${COLORS.slice(0, 6).map((x, i) => `<button class="sw ${i === 0 ? 'on' : ''}" style="background:${x}" data-act="pickSw" data-color="${x}"></button>`).join('')}</div><span class="sp" style="flex:1"></span><button class="btn sm y" data-act="addEvent" data-date="${date}">＋ 加入</button></div>
+    ${dd.length ? `<div class="hr"></div><h4 style="margin-bottom:6px">⏰ 這天到期</h4>${dd.map(r => `<div class="task ${r.done ? 'done' : ''}"><button class="chk" data-act="toggle" data-ref="${r.ref}" data-keep="day" data-date="${date}"></button><div class="tt">${esc(r.title)} ${r.course ? `<span class="chip">${esc(r.course.name)}</span>` : ''}</div></div>`).join('')}` : ''}
+    <div class="hr"></div><h4 style="margin-bottom:6px">📷 每日回顧</h4>
+    ${PHOTOS[date] || rv?.note ? `<div class="row">${PHOTOS[date] ? `<img src="${PHOTOS[date]}" alt="" style="width:110px;height:82px;object-fit:cover;border:2px solid var(--line)">` : ''}<p class="small grow" style="margin:0">${esc(rv?.note || '')}</p></div>` : '<div class="empty">還沒有這天的回顧</div>'}
+    <div class="modal-actions"><button class="btn w" data-act="openReview" data-date="${date}">${PHOTOS[date] || rv?.note ? '編輯回顧' : '＋ 寫回顧'}</button></div>`);
+}
+
+/* ---------- habits ---------- */
+function habitKey(h, date) {
+  if (h.freq === 'weekly') return mondayOf(date);
+  if (h.freq === 'monthly') return date.slice(0, 7);
+  return date;
+}
+const isTarget = (h, date) => h.freq !== 'custom' || h.days.includes(wdOf(date));
+function habitDueToday(h) { return isTarget(h, TODAY()); }
+function habitStreak(h) {
+  const td = h.archived && h.archivedAt ? h.archivedAt : TODAY(); let n = 0, g = 0;
+  if (h.freq === 'weekly' || h.freq === 'monthly') {
+    const step = k => h.freq === 'weekly' ? addDays(k, -7) : ymShift(k, -1);
+    let k = habitKey(h, td); if (!h.log[k]) k = step(k);
+    while (h.log[k] && g++ < 600) { n++; k = step(k); }
+    return n;
+  }
+  let d = td; if (!h.log[d]) d = addDays(d, -1);
+  while (g++ < 1500) {
+    if (!isTarget(h, d)) { d = addDays(d, -1); continue; }
+    if (h.log[d]) { n++; d = addDays(d, -1); } else break;
+  }
+  return n;
+}
+const habitTotal = h => Object.keys(h.log).filter(k => h.log[k]).length;
+function habitGrid(h) {
+  const td = TODAY(), tk = habitKey(h, td), ro = h.archived;
+  if (h.freq === 'weekly') {
+    const ws = []; for (let i = 11; i >= 0; i--) ws.push(addDays(tk, -7 * i));
+    return `<div class="small muted px" style="margin-bottom:4px">最近 12 週</div><div class="hgrid w12">${ws.map(w => `<button class="hc ${h.log[w] ? 'on' : ''} ${w === tk ? 'today' : ''}" ${ro ? '' : `data-act="habit" data-id="${h.id}" data-key="${w}"`} title="${w} 那週">${md(w)}</button>`).join('')}</div>`;
+  }
+  if (h.freq === 'monthly') {
+    const y = td.slice(0, 4);
+    return `<div class="small muted px" style="margin-bottom:4px">${y} 年</div><div class="hgrid m12">${Array.from({ length: 12 }, (_, i) => `${y}-${pad(i + 1)}`).map(m => `<button class="hc ${h.log[m] ? 'on' : ''} ${m === tk ? 'today' : ''} ${m > tk ? 'fut' : ''}" ${ro || m > tk ? '' : `data-act="habit" data-id="${h.id}" data-key="${m}"`}>${+m.slice(5)}月</button>`).join('')}</div>`;
+  }
+  const ym = UI.hMonth[h.id] || (h.archived && h.archivedAt ? h.archivedAt.slice(0, 7) : thisYM());
+  const cells = monthCells(ym);
+  return `<div class="row" style="justify-content:space-between;margin-bottom:4px"><button class="iconbtn" data-act="hMonth" data-id="${h.id}" data-n="-1">◀</button><span class="px small">${ymLabel(ym)}</span><button class="iconbtn" data-act="hMonth" data-id="${h.id}" data-n="1">▶</button></div>
+  <div class="hgrid">${['一', '二', '三', '四', '五', '六', '日'].map(w => `<span class="wdh">${w}</span>`).join('')}
+  ${cells.map(({ date, in: inM }) => {
+    if (!inM) return '<span class="hc blank"></span>';
+    const fut = date > td, off = !isTarget(h, date);
+    const act = !ro && !fut && !off ? `data-act="habit" data-id="${h.id}" data-key="${date}"` : '';
+    return `<button class="hc ${h.log[date] ? 'on' : ''} ${date === td ? 'today' : ''} ${fut ? 'fut' : ''} ${off ? 'off' : ''}" ${act}>${+date.slice(8)}</button>`;
+  }).join('')}</div>`;
+}
+function habitCard(h) {
+  const k = habitKey(h, TODAY()), due = habitDueToday(h);
+  const freqTxt = h.freq === 'custom' ? '每週' + h.days.slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(d => WD[d]).join('、') : FREQ[h.freq];
+  return `<div class="card hcard ${h.archived ? 'arch' : ''}">
+    <div class="hh"><div class="hi">${h.icon}</div><div class="hn"><b>${esc(h.name)}</b><span class="chip">${freqTxt}</span> ${h.archived ? `<span class="medal">🏅 ${h.archivedAt ? md(h.archivedAt) : ''} 結業</span>` : ''}</div>
+      ${!h.archived && due ? `<button class="btn sm ${h.log[k] ? 'on' : ''}" data-act="habit" data-id="${h.id}" data-key="${k}">${h.log[k] ? '✓ 已打卡' : '打卡'}</button>` : ''}</div>
+    <div class="hstats"><div><b>🔥${habitStreak(h)}</b><small>連續</small></div><div><b>${habitTotal(h)}</b><small>累計次數</small></div><div><b>${md(h.createdAt)}</b><small>開始於</small></div></div>
+    ${habitGrid(h)}
+    <div class="row" style="justify-content:flex-end;margin-top:10px">
+      ${h.archived ? `<button class="btn sm w" data-act="unarchive" data-id="${h.id}">重新開始</button>` : `<button class="btn sm w" data-act="archive" data-id="${h.id}">🏅 結業</button>`}
+      <button class="iconbtn small" data-act="delHabit" data-id="${h.id}">刪除</button></div></div>`;
+}
+PAGES.habits = () => {
+  const act = S.habits.filter(h => !h.archived), arc = S.habits.filter(h => h.archived);
+  return `<div class="page-h"><h2>習慣打卡</h2><span class="sp"></span><button class="btn y" data-act="habitModal">＋ 新增習慣</button></div>
+  ${act.length ? `<div class="habits">${act.map(habitCard).join('')}</div>` : '<div class="card empty">還沒有習慣卡片，按「新增習慣」開始吧！</div>'}
+  <div class="page-h" style="margin-top:34px"><h2>堅持的足跡</h2><span class="muted small">結業的習慣會留在這裡，紀錄都不會消失。</span></div>
+  ${arc.length ? `<div class="habits">${arc.map(habitCard).join('')}</div>` : '<div class="empty">還沒有結業的習慣</div>'}`;
+};
+function habitModal() {
+  openModal('新增習慣', `
+    <label class="field"><span>習慣名稱</span><input type="text" id="hName" placeholder="例如：喝 8 杯水、背 20 個單字"></label>
+    <div class="field"><span>圖示</span><div class="icons" id="hIcon">${H_ICONS.map((x, i) => `<button class="${i === 0 ? 'on' : ''}" data-act="pickIcon" data-v="${x}">${x}</button>`).join('')}</div></div>
+    <div class="field"><span>打卡頻率</span><div class="seg" id="hFreq">${Object.entries(FREQ).map(([k, l], i) => `<button class="${i === 0 ? 'on' : ''}" data-act="pickFreq" data-v="${k}">${l}</button>`).join('')}</div></div>
+    <div class="field hidden" id="hDaysBox"><span>哪幾天要做？</span><div class="days7">${[1, 2, 3, 4, 5, 6, 0].map(d => `<label><input type="checkbox" value="${d}" ${d >= 1 && d <= 5 && d % 2 ? 'checked' : ''}>${WD[d]}</label>`).join('')}</div></div>
+    <p class="small muted" id="hFreqHint">每日：卡片上會出現當月的日期格子。</p>
+    <div class="modal-actions"><button class="btn w" data-act="closeModal">取消</button><button class="btn y" data-act="saveHabit">建立習慣卡</button></div>`);
+}
+
+/* ---------- money ---------- */
+function monthMoney(ym) {
+  const l = S.money.filter(m => m.date.startsWith(ym));
+  const out = l.filter(m => m.type === 'out').reduce((s, m) => s + m.amount, 0);
+  const inc = l.filter(m => m.type === 'in').reduce((s, m) => s + m.amount, 0);
+  return { l, out, inc };
+}
+PAGES.money = () => {
+  const ym = UI.monYM, { l, out, inc } = monthMoney(ym), B = S.settings.budget;
+  const cats = {}; l.filter(m => m.type === 'out').forEach(m => cats[m.cat] = (cats[m.cat] || 0) + m.amount);
+  const catArr = Object.entries(cats).sort((a, b) => b[1] - a[1]); const max = catArr[0]?.[1] || 1;
+  const byDay = {}; l.forEach(m => (byDay[m.date] = byDay[m.date] || []).push(m));
+  const days = Object.keys(byDay).sort().reverse();
+  const type = UI.mType || 'out', catList = type === 'out' ? OUT_CATS : IN_CATS;
+  return `<div class="page-h"><h2>記帳</h2><span class="sp"></span><div class="navrow"><button class="btn sm w" data-act="monNav" data-n="-1">◀</button><span class="ttl">${ymLabel(ym)}</span><button class="btn sm w" data-act="monNav" data-n="1">▶</button></div></div>
+  <div class="card" style="margin-bottom:18px"><div class="addbar" style="margin:0">
+    <div class="seg"><button class="${type === 'out' ? 'on' : ''}" data-act="mType" data-v="out">支出</button><button class="${type === 'in' ? 'on' : ''}" data-act="mType" data-v="in">收入</button></div>
+    <input type="date" id="mDate" value="${TODAY()}">
+    <select id="mCat">${Object.entries(catList).map(([k, i]) => `<option value="${k}">${i} ${k}</option>`).join('')}</select>
+    <input type="number" id="mAmt" placeholder="金額" min="0" style="width:110px" data-enter="addMoney">
+    <input type="text" id="mNote" placeholder="備註（例如：午餐便當）" data-enter="addMoney">
+    <button class="btn y" data-act="addMoney">＋ 記一筆</button></div></div>
+  <div class="dash" style="grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)">
+    <div class="card">
+      <div class="card-h"><h3>📊 本月整理</h3></div>
+      <div class="stat3"><div><small>支出</small><b>${money(out)}</b></div><div><small>收入</small><b>${money(inc)}</b></div><div><small>結餘</small><b>${money(inc - out)}</b></div></div>
+      <div class="hr"></div>
+      <div class="kv small"><span>每月預算</span><span><input type="number" min="0" value="${B}" style="width:100px;padding:2px 6px" data-change="budget"> 元</span></div>
+      ${B > 0 ? `<div class="bar ${out > B ? 'r' : out > B * .8 ? 'y' : 'g'}" style="height:16px"><i style="width:${Math.min(100, out / B * 100)}%"></i></div><p class="small" style="margin:4px 0 0">${out > B ? `⚠ 超出預算 ${money(out - B)}` : `還可以花 ${money(B - out)}`}${ym === thisYM() && out <= B ? `，平均每天 ${money((B - out) / (new Date(+ym.slice(0, 4), +ym.slice(5), 0).getDate() - new Date().getDate() + 1))}` : ''}</p>` : ''}
+      <div class="hr"></div><h4 style="margin-bottom:6px" class="small">支出分類</h4>
+      <div class="catbars">${catArr.map(([k, v]) => `<div class="cb"><span>${OUT_CATS[k] || '📦'} ${k}</span><div class="bar"><i style="width:${v / max * 100}%"></i></div><span>${money(v)}</span></div>`).join('') || '<div class="empty">這個月還沒有支出</div>'}</div>
+    </div>
+    <div class="card"><div class="card-h"><h3>🧾 明細</h3><span class="muted small">${l.length} 筆</span></div>
+      ${days.map(d => { const items = byDay[d]; const sum = items.reduce((s, m) => s + (m.type === 'out' ? -m.amount : m.amount), 0);
+        return `<div class="mday"><h4><span>${mdw(d)}</span><span>${money(sum)}</span></h4>${items.map(m => `<div class="mrow"><span class="c">${(m.type === 'out' ? OUT_CATS : IN_CATS)[m.cat] || '📦'}</span><span class="d">${esc(m.note || m.cat)} <span class="muted small">${m.note ? m.cat : ''}</span></span><span class="a ${m.type}">${m.type === 'out' ? '-' : '+'}${money(m.amount)}</span><button class="iconbtn" data-act="delMoney" data-id="${m.id}">✕</button></div>`).join('')}</div>`; }).join('') || '<div class="empty">還沒有紀錄</div>'}
+    </div></div>`;
+};
+
+/* ---------- notes ---------- */
+PAGES.notes = () => {
+  const list = [...S.notes].sort((a, b) => (b.pinned - a.pinned) || (b.updatedAt - a.updatedAt));
+  return `<div class="page-h"><h2>筆記與備忘錄</h2><span class="sp"></span><button class="btn y" data-act="newNote">＋ 新便利貼</button></div>
+  ${list.length ? `<div class="notes">${list.map(n => `<div class="note ${n.pinned ? 'pinned' : ''}" style="background:${n.color}">
+    <textarea data-input="noteText" data-id="${n.id}" placeholder="寫點什麼…">${esc(n.text)}</textarea>
+    <div class="nf">${NOTE_COLORS.map(c => `<button class="cdot" style="background:${c}" data-act="noteColor" data-id="${n.id}" data-color="${c}" aria-label="換顏色"></button>`).join('')}<span class="sp"></span>
+    <span class="ts">${new Date(n.updatedAt).getMonth() + 1}/${new Date(n.updatedAt).getDate()}</span>
+    <button class="iconbtn" data-act="notePin" data-id="${n.id}" title="釘選到儀表板">${n.pinned ? '📌' : '📍'}</button><button class="iconbtn" data-act="delNote" data-id="${n.id}" title="刪除">🗑</button></div></div>`).join('')}</div>`
+  : '<div class="card empty">還沒有便利貼～</div>'}`;
+};
+
+/* ---------- review ---------- */
+PAGES.review = () => {
+  const ym = UI.revYM, td = TODAY();
+  const cnt = Object.keys(S.reviews).filter(d => d.startsWith(ym) && (S.reviews[d].photo || S.reviews[d].note)).length;
+  return `<div class="page-h"><h2>每日回顧</h2><span class="sp"></span><div class="navrow"><button class="btn sm w" data-act="revNav" data-n="-1">◀</button><span class="ttl">${ymLabel(ym)}</span><button class="btn sm w" data-act="revNav" data-n="1">▶</button></div></div>
+  <div class="notice">${slime(3)}<p>這個月記錄了 <b class="px">${cnt}</b> 天。不知道寫什麼也沒關係，<b>一張照片</b>就是一天的紀錄，回頭看會發現自己其實做了好多事。</p><button class="btn y" data-act="openReview" data-date="${td}">＋ 今天的回顧</button></div>
+  <div class="cal rcal">${['一', '二', '三', '四', '五', '六', '日'].map(w => `<div class="wd">${w}</div>`).join('')}
+  ${monthCells(ym).map(({ date, in: inM }) => {
+    const ph = PHOTOS[date], rv = S.reviews[date], fut = date > td;
+    return `<div class="cell ${inM ? '' : 'out'} ${date === td ? 'today' : ''} ${ph ? 'photo' : ''}" ${fut ? '' : `data-act="openReview" data-date="${date}"`} ${ph ? `style="background-image:url(${ph})"` : ''}>
+      <span class="n">${+date.slice(8)}</span>${rv?.note && inM ? `<div class="note-snip">${esc(rv.note)}</div>` : ''}</div>`;
+  }).join('')}</div>`;
+};
+function reviewModal(date) {
+  const rv = S.reviews[date] || {};
+  openModal(`📷 ${mdw(date)} 的回顧`, `
+    <div class="rv-photo" id="rvPhoto" style="${PHOTOS[date] ? `background-image:url(${PHOTOS[date]})` : ''}">${PHOTOS[date] ? '' : '還沒有照片'}</div>
+    <div class="row" style="margin-bottom:12px"><button class="btn" data-act="pickPhoto" data-date="${date}">${PHOTOS[date] ? '換一張照片' : '選擇照片'}</button>
+      ${PHOTOS[date] ? `<button class="btn sm w" data-act="delPhoto" data-date="${date}">移除照片</button>` : ''}</div>
+    <label class="field"><span>備註（想寫就寫）</span><textarea id="rvNote" rows="3" placeholder="今天…">${esc(rv.note || '')}</textarea></label>
+    <div class="modal-actions"><button class="btn w" data-act="closeModal">關閉</button><button class="btn y" data-act="saveReview" data-date="${date}">儲存</button></div>`);
+}
+
+/* ---------- settings ---------- */
+PAGES.settings = () => `
+  <div class="page-h"><h2>設定</h2></div>
+  <div class="dash" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+    <div class="card"><div class="card-h"><h3>🎓 學期設定</h3></div>
+      <label class="field"><span>學期第一週的週一</span><input type="date" value="${S.settings.semStart}" data-change="semStart"></label>
+      <p class="small muted">用來計算「現在是第幾週」和課程的每週進度。目前是第 ${semWeek()} 週。</p></div>
+    <div class="card"><div class="card-h"><h3>💾 備份資料</h3></div>
+      <p class="small">資料只存在<b>這個瀏覽器</b>裡。換電腦或換瀏覽器前，先匯出備份，再到新的地方匯入。</p>
+      <div class="row"><button class="btn y" data-act="exportData">⬇ 匯出備份</button><button class="btn w" data-act="importData">⬆ 匯入備份</button></div></div>
+    <div class="card"><div class="card-h"><h3>🧹 清除資料</h3></div>
+      <p class="small">${S.sampleNotice ? '現在顯示的是範例資料。' : ''}清除後所有待辦、課程、習慣、記帳、筆記和照片都會刪除，無法復原。</p>
+      <div class="row"><button class="btn pk" data-act="wipe">清除全部資料，從零開始</button></div></div>
+    <div class="card"><div class="card-h"><h3>🎮 冒險者狀態</h3></div>
+      <div class="kv"><span>等級</span><b>Lv.${level()}</b></div><div class="kv"><span>總經驗值</span><b>${S.exp} EXP</b></div>
+      <div class="kv"><span>完成的待辦</span><b>${S.tasks.filter(t => t.done).length}</b></div>
+      <div class="kv"><span>習慣打卡總次數</span><b>${S.habits.reduce((s, h) => s + habitTotal(h), 0)}</b></div>
+      <p class="small muted">主線 +${EXP.main}、委託 +${EXP.quest}、一般待辦 +${EXP.task}、習慣打卡 +${EXP.habit}，每 100 EXP 升一級。</p></div>
+  </div>`;
+
+/* ===================================================================
+   RENDER
+   =================================================================== */
+const page = () => { const p = location.hash.slice(1); return PAGES[p] ? p : 'dash'; };
+function render() {
+  ensureDaily(); save();
+  const p = page(), td = TODAY(), wk = semWeek();
+  $('#nav').innerHTML = NAV.map(([k, i, l]) => `<a href="#${k}" class="${k === p ? 'on' : ''}"><span class="ic">${i}</span>${l}</a>`).join('');
+  $('#topDate').textContent = `${td.slice(0, 4)}/${md(td)}（${WD[wdOf(td)]}）`;
+  $('#topWeek').textContent = wk >= 1 && wk <= 18 ? `第 ${wk} 週` : '假期中';
+  $('#topLv').innerHTML = `<span class="badge">Lv.${level()}</span><div class="bar y stripes"><i style="width:${S.exp % 100}%"></i></div><span class="exp">${S.exp % 100}/100 EXP</span>`;
+  $('#sideFoot').innerHTML = `完成待辦 ${S.tasks.filter(t => t.done).length} 件<br>回顧 ${Object.keys(S.reviews).length} 天`;
+  const y = scrollY;
+  $('#page').innerHTML = PAGES[p]();
+  scrollTo(0, y);
+  if (p === 'courses' && !UI.scrolledWeek) { const n = $('#nowWeek'), box = $('#weeksBox'); if (n && box) { box.scrollTop = n.offsetTop - box.offsetTop - 60; UI.scrolledWeek = true; } }
+}
+const commit = () => { save(); render(); };
+function go(p) { if (location.hash.slice(1) === p) render(); else location.hash = p; closeSide(); }
+function closeSide() { $('#side').classList.remove('open'); $('#scrim').classList.remove('open'); }
+window.addEventListener('hashchange', () => { UI.scrolledWeek = false; render(); scrollTo(0, 0); });
+
+/* ===================================================================
+   ACTIONS
+   =================================================================== */
+const val = id => ($('#' + id)?.value ?? '').trim();
+const ACT = {
+  openSide() { $('#side').classList.add('open'); $('#scrim').classList.add('open'); },
+  closeSide,
+  closeModal,
+  go: el => go(el.dataset.page),
+  hideNotice() { S.sampleNotice = false; commit(); },
+  toggle(el) {
+    toggleRef(el.dataset.ref);
+    if (el.dataset.keep === 'day') dayModal(el.dataset.date);
+  },
+  reroll() {
+    const D = S.daily; if (D.rerolled) return;
+    const old = D.quests.filter(r => !refOf(r).done);
+    D.quests = D.quests.filter(r => refOf(r).done);
+    let pool = questPool(D, old); if (pool.length < old.length) pool = [...pool, ...shuffle(old)];
+    pool.slice(0, old.length).forEach(r => D.quests.push(r));
+    D.rerolled = true; toast('🎲 委託已重新抽選', 'info'); commit();
+  },
+  // tasks
+  addTask() {
+    const title = val('tTitle'); if (!title) return toast('先寫下要做什麼喔', 'info');
+    S.tasks.push({ id: uid(), title, ddl: val('tDdl'), quad: val('tQuad') || null, hz: val('tHz') || null, done: false, createdAt: Date.now() });
+    commit(); $('#tTitle')?.focus();
+  },
+  taskView(el) { S.settings.taskView = el.dataset.v; commit(); },
+  editTask: el => taskModal(el.dataset.id),
+  saveTask(el) {
+    const t = S.tasks.find(x => x.id === el.dataset.id); if (!t) return;
+    t.title = val('eTitle') || t.title; t.ddl = val('eDdl'); t.quad = val('eQuad') || null; t.hz = val('eHz') || null;
+    closeModal(); commit();
+  },
+  delTask(el) {
+    if (!confirm('確定要刪除這個待辦嗎？')) return;
+    S.tasks = S.tasks.filter(x => x.id !== el.dataset.id); closeModal(); commit();
+  },
+  // courses
+  courseModal: el => courseModal(el.dataset.id),
+  pickCourse(el) { UI.course = el.dataset.id; UI.scrolledWeek = false; render(); },
+  pickSw(el) { $$('.sw', el.parentElement).forEach(x => x.classList.remove('on')); el.classList.add('on'); },
+  addSlot() { $('#slots').insertAdjacentHTML('beforeend', UI.slotTpl); },
+  rmSlot(el) { el.closest('.slot-row').remove(); },
+  saveCourse(el) {
+    const name = val('cName'); if (!name) return toast('請輸入課程名稱', 'info');
+    const slots = $$('#slots .slot-row').map(r => ({ day: +$('.sDay', r).value, start: $('.sStart', r).value || '09:00', end: $('.sEnd', r).value || '10:00' })).filter(s => s.end > s.start);
+    const data = { name, teacher: val('cTeacher'), room: val('cRoom'), color: $('#cColor .sw.on')?.dataset.color || COLORS[0], slots };
+    if (el.dataset.id) Object.assign(S.courses.find(c => c.id === el.dataset.id), data);
+    else { const c = { id: uid(), ...data, hw: [], weeks: {} }; S.courses.push(c); UI.course = c.id; }
+    closeModal(); commit();
+  },
+  delCourse(el) {
+    if (!confirm('刪除課程會一起刪除它的作業和每週進度，確定嗎？')) return;
+    S.courses = S.courses.filter(c => c.id !== el.dataset.id); closeModal(); commit();
+  },
+  addHw(el) {
+    const c = S.courses.find(x => x.id === el.dataset.c), title = val('hwTitle'); if (!c || !title) return;
+    c.hw.push({ id: uid(), title, ddl: val('hwDdl'), done: false }); commit(); $('#hwTitle')?.focus();
+  },
+  delHw(el) { const c = S.courses.find(x => x.id === el.dataset.c); c.hw = c.hw.filter(h => h.id !== el.dataset.id); commit(); },
+  weekDone(el) { const c = S.courses.find(x => x.id === el.dataset.c); const w = c.weeks[el.dataset.w] = c.weeks[el.dataset.w] || {}; w.done = !w.done; if (w.done) gainExp(EXP.task); else gainExp(-EXP.task); commit(); },
+  // calendar
+  calView(el) { S.settings.calView = el.dataset.v; commit(); },
+  calNav(el) { const n = +el.dataset.n; if (S.settings.calView === 'month') UI.calYM = ymShift(UI.calYM, n); else UI.calWeek = addDays(UI.calWeek, 7 * n); render(); },
+  calToday() { UI.calYM = thisYM(); UI.calWeek = mondayOf(TODAY()); render(); },
+  dayModal: el => dayModal(el.dataset.date),
+  addEvent(el) {
+    const title = val('evTitle'); if (!title) return toast('請輸入行程名稱', 'info');
+    S.events.push({ id: uid(), date: el.dataset.date, time: val('evTime'), title, color: $('#evColor .sw.on')?.dataset.color || COLORS[0] });
+    commit(); dayModal(el.dataset.date);
+  },
+  delEvent(el) { S.events = S.events.filter(e => e.id !== el.dataset.id); commit(); dayModal(el.dataset.date); },
+  // habits
+  habitModal,
+  pickIcon(el) { $$('#hIcon button').forEach(x => x.classList.remove('on')); el.classList.add('on'); },
+  pickFreq(el) {
+    $$('#hFreq button').forEach(x => x.classList.remove('on')); el.classList.add('on');
+    $('#hDaysBox').classList.toggle('hidden', el.dataset.v !== 'custom');
+    $('#hFreqHint').textContent = { daily: '每日：卡片上會出現當月的日期格子。', weekly: '每週：卡片上會出現最近 12 週的格子，一週打卡一次。', monthly: '每月：卡片上會出現今年 12 個月的格子。', custom: '自訂：只有選到的星期幾可以打卡，其他天的格子會變灰。' }[el.dataset.v];
+  },
+  saveHabit() {
+    const name = val('hName'); if (!name) return toast('請輸入習慣名稱', 'info');
+    const freq = $('#hFreq .on').dataset.v;
+    const days = $$('#hDaysBox input:checked').map(x => +x.value);
+    if (freq === 'custom' && !days.length) return toast('至少選一天', 'info');
+    S.habits.push({ id: uid(), name, icon: $('#hIcon .on').dataset.v, freq, days, log: {}, archived: false, createdAt: TODAY() });
+    closeModal(); commit();
+  },
+  habit(el) {
+    const h = S.habits.find(x => x.id === el.dataset.id); if (!h) return;
+    const k = el.dataset.key;
+    if (h.log[k]) { delete h.log[k]; gainExp(-EXP.habit); } else { h.log[k] = true; gainExp(EXP.habit); }
+    commit();
+  },
+  hMonth(el) { const h = S.habits.find(x => x.id === el.dataset.id); UI.hMonth[el.dataset.id] = ymShift(UI.hMonth[el.dataset.id] || (h.archived && h.archivedAt ? h.archivedAt.slice(0, 7) : thisYM()), +el.dataset.n); render(); },
+  archive(el) { const h = S.habits.find(x => x.id === el.dataset.id); h.archived = true; h.archivedAt = TODAY(); toast('🏅 習慣結業！紀錄會好好保存', 'info'); commit(); },
+  unarchive(el) { const h = S.habits.find(x => x.id === el.dataset.id); h.archived = false; commit(); },
+  delHabit(el) { if (!confirm('刪除後打卡紀錄也會消失。如果只是不想繼續，可以按「結業」保留紀錄。確定刪除？')) return; S.habits = S.habits.filter(x => x.id !== el.dataset.id); commit(); },
+  // money
+  mType(el) { UI.mType = el.dataset.v; render(); },
+  monNav(el) { UI.monYM = ymShift(UI.monYM, +el.dataset.n); render(); },
+  addMoney() {
+    const amount = Math.round(+val('mAmt')); if (!amount || amount <= 0) return toast('請輸入金額', 'info');
+    const date = val('mDate') || TODAY();
+    S.money.push({ id: uid(), date, type: UI.mType || 'out', amount, cat: val('mCat'), note: val('mNote') });
+    UI.monYM = date.slice(0, 7); commit(); $('#mAmt')?.focus();
+  },
+  delMoney(el) { S.money = S.money.filter(m => m.id !== el.dataset.id); commit(); },
+  // notes
+  quickNote() {
+    const text = val('qnote'); if (!text) return;
+    S.notes.push({ id: uid(), text, color: NOTE_COLORS[0], pinned: false, updatedAt: Date.now() });
+    toast('📝 已記下', 'info'); commit(); $('#qnote')?.focus();
+  },
+  newNote() {
+    S.notes.push({ id: uid(), text: '', color: NOTE_COLORS[S.notes.length % NOTE_COLORS.length], pinned: false, updatedAt: Date.now() + 1e6 });
+    commit(); $('.note textarea')?.focus();
+  },
+  noteColor(el) { const n = S.notes.find(x => x.id === el.dataset.id); n.color = el.dataset.color; commit(); },
+  notePin(el) { const n = S.notes.find(x => x.id === el.dataset.id); n.pinned = !n.pinned; commit(); },
+  delNote(el) { if (!confirm('刪除這張便利貼？')) return; S.notes = S.notes.filter(x => x.id !== el.dataset.id); commit(); },
+  // review
+  revNav(el) { UI.revYM = ymShift(UI.revYM, +el.dataset.n); render(); },
+  openReview: el => reviewModal(el.dataset.date),
+  pickPhoto(el) { UI.photoDate = el.dataset.date; const f = $('#hiddenFile'); f.value = ''; f.click(); },
+  async delPhoto(el) {
+    const d = el.dataset.date; await DB.del(d);
+    if (PHOTOS[d]) { URL.revokeObjectURL(PHOTOS[d]); delete PHOTOS[d]; }
+    if (S.reviews[d]) { S.reviews[d].photo = false; if (!S.reviews[d].note) delete S.reviews[d]; }
+    commit(); reviewModal(d);
+  },
+  saveReview(el) {
+    const d = el.dataset.date, note = $('#rvNote').value.trim();
+    if (note || PHOTOS[d]) S.reviews[d] = Object.assign({}, S.reviews[d], { note, photo: !!PHOTOS[d] }); else delete S.reviews[d];
+    closeModal(); toast('📷 回顧已儲存', 'info'); commit();
+  },
+  // settings
+  async exportData() {
+    const all = await DB.all(), photos = {};
+    for (const k in all) photos[k] = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(all[k]); });
+    const blob = new Blob([JSON.stringify({ app: 'pixel-quest-desk', version: 1, state: S, photos })], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `pixel-quest-desk-${TODAY()}.json`; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast('⬇ 備份已下載', 'info');
+  },
+  importData() { const f = $('#importFile'); f.value = ''; f.click(); },
+  async wipe() {
+    if (!confirm('確定要清除全部資料嗎？這個動作無法復原。')) return;
+    S = DEFAULT(); S.seeded = true; await DB.clear();
+    for (const k in PHOTOS) { URL.revokeObjectURL(PHOTOS[k]); delete PHOTOS[k]; }
+    toast('🧹 已清空，開始新的冒險吧！', 'info'); go('dash');
+  }
+};
+
+/* ---------- event wiring ---------- */
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]');
+  if (a && ACT[a.dataset.act]) { e.preventDefault(); ACT[a.dataset.act](a, e); return; }
+  if (e.target.closest('input,textarea,select,label,a')) return;
+  const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#modal').hidden) closeModal();
+  if (e.key === 'Enter' && !e.isComposing && e.target.dataset?.enter) { e.preventDefault(); ACT[e.target.dataset.enter](e.target); }
+});
+const CHG = {
+  hideDone: el => { S.settings.hideDone = el.checked; commit(); },
+  weekText: el => { const c = S.courses.find(x => x.id === el.dataset.c); (c.weeks[el.dataset.w] = c.weeks[el.dataset.w] || {}).text = el.value; save(); },
+  budget: el => { S.settings.budget = Math.max(0, Math.round(+el.value || 0)); commit(); },
+  semStart: el => { if (el.value) { S.settings.semStart = el.value; commit(); } }
+};
+document.addEventListener('change', e => { const k = e.target.dataset?.change; if (k && CHG[k]) CHG[k](e.target); });
+document.addEventListener('input', e => {
+  if (e.target.dataset?.input === 'noteText') { const n = S.notes.find(x => x.id === e.target.dataset.id); if (n) { n.text = e.target.value; n.updatedAt = Date.now(); save(); } }
+});
+$('#hiddenFile').addEventListener('change', async e => {
+  const f = e.target.files[0], d = UI.photoDate; if (!f || !d) return;
+  const note = $('#rvNote')?.value;
+  if (await setPhoto(d, f)) { if (note !== undefined) { S.reviews[d].note = note.trim(); save(); } render(); reviewModal(d); }
+});
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (data.app !== 'pixel-quest-desk' || !data.state) throw 0;
+    if (!confirm('匯入會覆蓋目前所有資料，確定嗎？')) return;
+    S = Object.assign(DEFAULT(), data.state); S.settings = Object.assign(DEFAULT().settings, S.settings);
+    await DB.clear(); for (const k in PHOTOS) { URL.revokeObjectURL(PHOTOS[k]); delete PHOTOS[k]; }
+    for (const k in data.photos || {}) { const b = await (await fetch(data.photos[k])).blob(); await DB.put(k, b); PHOTOS[k] = URL.createObjectURL(b); }
+    toast('⬆ 匯入完成', 'info'); commit();
+  } catch (err) { toast('⚠ 這不是正確的備份檔', 'info'); }
+});
+// drag & drop classification
+document.addEventListener('dragstart', e => { const t = e.target.closest?.('[data-drag]'); if (t) { e.dataTransfer.setData('text/plain', t.dataset.drag); e.dataTransfer.effectAllowed = 'move'; t.classList.add('dragging'); } });
+document.addEventListener('dragend', () => $$('.dragging,.over').forEach(x => x.classList.remove('dragging', 'over')));
+document.addEventListener('dragover', e => { const z = e.target.closest?.('[data-zone]'); if (z) { e.preventDefault(); $$('.over').forEach(x => x !== z && x.classList.remove('over')); z.classList.add('over'); } });
+document.addEventListener('drop', e => {
+  const z = e.target.closest?.('[data-zone]'); if (!z) return; e.preventDefault();
+  const t = S.tasks.find(x => x.id === e.dataTransfer.getData('text/plain')); if (!t) return;
+  const [f, v] = z.dataset.zone.split(':'); t[f] = v === 'none' ? null : v; commit();
+});
+
+/* ===================================================================
+   SAMPLE DATA (first visit only)
+   =================================================================== */
+function seed() {
+  const td = TODAY(), d = n => addDays(td, n), now = Date.now();
+  const T = (title, o = {}) => ({ id: uid(), title, ddl: '', quad: null, hz: null, done: false, createdAt: now, ...o });
+  S.tasks = [
+    T('洗衣服'), T('換滑鼠電池'), T('回覆社團訊息'), T('買衛生紙'), T('整理書桌'), T('把相簿的照片備份'),
+    T('報名多益考試', { ddl: d(3), quad: 'q1', hz: 'week' }),
+    T('準備期中考範圍筆記', { ddl: d(12), quad: 'q2', hz: 'month' }),
+    T('預約健康檢查', { quad: 'q3', hz: 'week' }),
+    T('讀完一本小說', { quad: 'q4', hz: 'year' }),
+    T('每週慢跑三次', { quad: 'q2', hz: 'week' }),
+    T('學會做一道新料理', { hz: 'month' }),
+    T('繳手機費', { done: true, doneAt: d(-1), hz: 'any', exp: 10 })
+  ];
+  const C = (name, teacher, room, color, slots, hw) => ({ id: uid(), name, teacher, room, color, slots, hw: hw.map(([t, n, done]) => ({ id: uid(), title: t, ddl: d(n), done: !!done })), weeks: {} });
+  S.courses = [
+    C('生成式 AI 導論', '王老師', '綜合 201', '#9ad3f7', [{ day: 4, start: '13:20', end: '15:10' }], [['Vibe Coding 互動網頁', 11], ['課堂反思心得', -3, true]]),
+    C('微積分', '林老師', '理學 105', '#ffd866', [{ day: 1, start: '10:10', end: '12:00' }, { day: 3, start: '10:10', end: '11:00' }], [['習題 3.1–3.4', 2]]),
+    C('大一英文', 'Ms. Chen', '文學 302', '#ff9fb2', [{ day: 2, start: '09:10', end: '11:00' }], [['Reading Report', 6]]),
+    C('程式設計', '張老師', '電算 B1', '#86d595', [{ day: 5, start: '14:20', end: '17:20' }], [])
+  ];
+  const wk = semWeek(); S.courses[0].weeks = { [wk - 1]: { text: 'Prompt 技巧、規格書', done: true }, [wk]: { text: 'Vibe Coding 實作', done: false } };
+  S.courses[1].weeks = { [wk - 1]: { text: '2.5 連鎖律', done: true }, [wk]: { text: '3.1–3.4 導數應用', done: false } };
+  S.events = [
+    { id: uid(), date: td, time: '18:30', title: '社團幹部會議', color: '#c7a8f5' },
+    { id: uid(), date: d(2), time: '12:00', title: '和小美吃午餐', color: '#ffb36b' },
+    { id: uid(), date: d(5), time: '', title: '家人生日 🎂', color: '#ff9fb2' }
+  ];
+  const log = (n, p) => { const l = {}; for (let i = 1; i <= n; i++) if (Math.random() < p) l[d(-i)] = true; return l; };
+  const wlog = {}; for (let i = 1; i <= 5; i++) wlog[mondayOf(d(-7 * i))] = true;
+  S.habits = [
+    { id: uid(), name: '喝 8 杯水', icon: '💧', freq: 'daily', days: [], log: Object.assign(log(20, .8), { [d(-1)]: true, [d(-2)]: true }), archived: false, createdAt: d(-25) },
+    { id: uid(), name: '運動 30 分鐘', icon: '🏃', freq: 'custom', days: [1, 3, 5], log: log(20, .5), archived: false, createdAt: d(-25) },
+    { id: uid(), name: '背 20 個英文單字', icon: '📖', freq: 'weekly', days: [], log: wlog, archived: false, createdAt: d(-40) },
+    { id: uid(), name: '整理房間大掃除', icon: '🧹', freq: 'monthly', days: [], log: { [ymShift(thisYM(), -1)]: true }, archived: false, createdAt: d(-60) },
+    { id: uid(), name: '暑假每天早起', icon: '🌱', freq: 'daily', days: [], log: Object.fromEntries(Object.entries(log(90, .9)).filter(([k]) => k <= d(-30))), archived: true, archivedAt: d(-30), createdAt: d(-90) }
+  ];
+  const M = (n, type, amount, cat, note) => ({ id: uid(), date: d(-n), type, amount, cat, note });
+  S.money = [M(0, 'out', 85, '餐飲', '早餐蛋餅＋奶茶'), M(0, 'out', 30, '交通', '公車'), M(1, 'out', 120, '餐飲', '午餐便當'), M(1, 'out', 399, '購物', '文具'),
+    M(2, 'out', 260, '娛樂', '電影'), M(3, 'in', 5000, '零用錢', '這個月零用錢'), M(3, 'out', 150, '生活', '洗衣精'), M(4, 'out', 450, '學習', '原文書影印')]
+    ;
+  S.notes = [
+    { id: uid(), text: '期中考週前要把微積分習題寫完！', color: '#fff6b8', pinned: true, updatedAt: now },
+    { id: uid(), text: '想看的電影：\n- 沙丘 3\n- 動物方城市 2', color: '#d6edfc', pinned: false, updatedAt: now - 1000 },
+    { id: uid(), text: '社團會議要提：期末成發場地', color: '#ffdbe3', pinned: true, updatedAt: now - 2000 }
+  ];
+  S.reviews = { [d(-1)]: { note: '和室友去吃了新開的拉麵 🍜', photo: false }, [d(-3)]: { note: '終於把報告交出去了！', photo: false } };
+  S.exp = 135; S.seeded = true; S.sampleNotice = true;
+}
+
+async function samplePhotos() {
+  const scenes = [[-1, '#ffb36b', '#ffd866'], [-3, '#9ad3f7', '#86d595'], [-6, '#c7a8f5', '#ff9fb2'], [-9, '#7fd8d0', '#ffffff']];
+  for (const [n, sky, ground] of scenes) {
+    const date = addDays(TODAY(), n);
+    const c = document.createElement('canvas'); c.width = 64; c.height = 48; const g = c.getContext('2d');
+    g.fillStyle = sky; g.fillRect(0, 0, 64, 48);
+    g.fillStyle = '#ffffff'; [[8, 8, 10], [40, 12, 14], [24, 4, 6]].forEach(([x, y, w]) => { g.fillRect(x, y, w, 3); g.fillRect(x + 2, y - 2, w - 4, 2); });
+    g.fillStyle = '#fff6b8'; g.fillRect(50, 4, 6, 6);
+    g.fillStyle = ground; for (let x = 0; x < 64; x += 4) g.fillRect(x, 30 + ((x * 7) % 5), 4, 20);
+    g.fillStyle = '#203650'; g.fillRect(28, 26, 8, 6); g.fillStyle = '#9ad3f7'; g.fillRect(29, 27, 6, 4);
+    const big = document.createElement('canvas'); big.width = 640; big.height = 480; const bg = big.getContext('2d');
+    bg.imageSmoothingEnabled = false; bg.drawImage(c, 0, 0, 640, 480);
+    const blob = await new Promise(r => big.toBlob(r, 'image/png'));
+    if (blob) { await DB.put(date, blob).catch(() => { }); PHOTOS[date] = URL.createObjectURL(blob); S.reviews[date] = Object.assign({ note: '' }, S.reviews[date], { photo: true }); }
+  }
+  save();
+}
+
+/* ---------- boot ---------- */
+(async function boot() {
+  load();
+  $('#logo').innerHTML = slime(3);
+  await DB.open(); await loadPhotos();
+  if (S.sampleNotice && !S.samplePics) { S.samplePics = true; await samplePhotos(); }
+  render();
+  // re-render after midnight so the daily quests refresh
+  let last = TODAY();
+  setInterval(() => { if (TODAY() !== last) { last = TODAY(); render(); } }, 60000);
+})();
+</script>
+</body>
+</html>
